@@ -1,0 +1,61 @@
+.creare-material-container {
+  padding: 10px 60px;
+  width: 100%;
+  min-height: calc(100vh - 64px);
+  box-sizing: border-box;
+  background-color: #eaf4fb;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.material-form {
+  background: #f3f3f3;
+  padding: 50px; /* mai mult spațiu interior */
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px; /* lățime mai mare */
+  box-sizing: border-box;
+  margin: 0 auto; /* centrare */
+}
+
+.material-form h2 {
+  margin-bottom: 24px;
+  font-weight: 600;
+  color:#2f5972;
+  font-size: 26px;
+}
+
+
+.material-actions {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 15px;
+}
+
+.material-actions span {
+  margin-right: 8px;
+  font-weight: 500;
+  color: #2f5972;
+}
+
+.material-actions .MuiIconButton-root {
+  color: #2f5972; /* albastru implicit */
+  background-color: rgba(47, 89, 114, 0.05);
+  transition: all 0.3s ease;
+}
+
+.material-actions .MuiIconButton-root:hover {
+  color: white;
+  background-color: #2f5972;
+}
+
+
+.material-bottom {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+}

@@ -1,0 +1,136 @@
+/* src/components/TemeProfesor.css */
+
+.teme-profesor-page {
+  background-color: #e6f0f7;
+  padding: 30px 20px;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  color: #2f5972;
+}
+
+.teme-profesor-page h1 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.error-message {
+  color: #c0392b;
+  background-color: #fceae9;
+  border: 1px solid #e74c3c;
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.no-teme {
+  text-align: center;
+  font-style: italic;
+  margin-top: 40px;
+  color: #555;
+}
+
+/* Container pentru toate cursurile */
+.cursuri-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Card individual pentru fiecare curs */
+.curs-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.curs-title {
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #f2f8fc;
+  padding-bottom: 5px;
+  color: #2f5972;
+}
+
+/* Container pentru lista de teme */
+.teme-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Un rând individual cu tema unui elev */
+.tema-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Dacă vrei bordură ușoară între rânduri:
+     border-bottom: 1px solid #e0e6ed; */
+  padding: 10px 0;
+}
+
+/* Stil pentru numele elevului */
+.tema-elev {
+  font-size: 1rem;
+  flex: 1; /* ocupă spațiul rămas */
+}
+
+/* Butoanele din dreptul fiecărei teme */
+.tema-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Butoane generice */
+.tema-actions button {
+  background-color: #2f5972;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Buton descărcare răspuns */
+.btn-descarca {
+  background-color: #27ae60; /* verde */
+}
+
+.btn-descarca:hover {
+  background-color: #1e8449;
+}
+
+/* Buton adăugare feedback */
+.btn-feedback {
+  background-color: #2980b9; /* albastru */
+}
+
+.btn-feedback:hover {
+  background-color: #21618c;
+}
+
+/* Responsive: pe ecrane foarte mici (sub 480px), butoanele să treacă pe linie nouă */
+@media (max-width: 480px) {
+  .tema-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .tema-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .tema-actions button {
+    flex: 1;
+    text-align: center;
+  }
+}

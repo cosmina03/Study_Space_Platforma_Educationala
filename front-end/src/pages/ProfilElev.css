@@ -1,0 +1,110 @@
+.profil-page {
+  display: flex;
+  gap: 40px;
+  padding: 40px 60px;
+  background-color: #e3eef6;
+  font-family: 'Segoe UI', sans-serif;
+  min-height: 100vh;
+}
+
+/* Cardul din stânga */
+.left-panel {
+  width: 280px;
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+  padding: 32px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+   height: 280px;
+}
+
+.avatar-profil {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  border: 3px solid #dce7ef;
+}
+
+.left-panel h2 {
+  font-size: 20px;
+  margin-bottom: 4px;
+  color: #1d3a4b;
+}
+
+.email {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 18px;
+}
+
+/* Butoane editare */
+.left-panel button {
+  margin-top: 6px;
+  padding: 8px 14px;
+  background-color: #2f5972;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.left-panel button:hover {
+  background-color: #20404e;
+}
+
+.input-nume {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* Zona din dreapta */
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.info-box, .cursuri-box {
+  background-color: white;
+  padding: 26px 28px;
+  border-radius: 18px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.info-box h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #2f5972;
+  margin-bottom: 6px;
+}
+
+.credit-count {
+  font-size: 26px;
+  font-weight: 600;
+  color: #1d3a4b;
+}
+
+.cursuri-box h3 {
+  font-size: 17px;
+  color: #2f5972;
+  margin-bottom: 10px;
+}
+
+.fara-cursuri {
+  font-style: italic;
+  font-size: 14px;
+  color: #888;
+}

@@ -1,0 +1,86 @@
+/* ======= STRUCTURA BAZĂ ======= */
+.header-appbar {
+  background-color: #2f5972 !important;
+  box-shadow: none;
+  border-bottom: 3px solid #ced7e0;
+}
+
+.header-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 80px !important;
+  padding: 0 20px !important;
+}
+
+/* ======= PARTEA STÂNGĂ ======= */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-logo {
+  width: 50px;
+  cursor: pointer;
+}
+
+.header-title {
+  color: #ced7e0;
+  font-weight: bold;
+  font-size: 22px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.header-title:hover {
+  color: #9ccddc;
+}
+
+/* ======= BUTOANE ȘI AVATARURI (dreapta) ======= */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Butoanele (Login, Creare curs) */
+.header-right .login-button {
+  background-color: #ced7e0;
+  color: #2f5972;
+  font-weight: bold;
+  border-radius: 30px;
+  padding: 6px 18px;
+  text-transform: none;
+  box-shadow: none;
+  transition: 0.3s;
+}
+
+.header-right .login-button:hover {
+  background-color: #9ccddc;
+  color: white;
+}
+
+/* Avatar */
+.MuiAvatar-root {
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 16px;
+  background-color: #ced7e0 !important;
+  color: #2f5972 !important;
+}
+
+/* Iconițe (elev): favorite, cart */
+.MuiIconButton-root {
+  color: #ced7e0 !important;
+  transition: transform 0.2s ease-in-out;
+}
+
+.MuiIconButton-root:hover {
+  transform: scale(1.1);
+}
+
+/* ======= BURGER MENU (Drawer) ======= */
+.drawer {
+  background-color: #ced7e0 !important;
+}

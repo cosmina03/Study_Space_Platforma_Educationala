@@ -1,0 +1,87 @@
+import { useEffect, useState } from "react";
+import "./CursuriPersonaleElev.css";
+import { useNavigate } from "react-router-dom";
+import { API_URL } from "../constants.js";
+
+
+const CursuriPersonaleElev = ({user}) => {
+  const navigate = useNavigate();
+  const [cursuri, setCursuri] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [favorited, setFavorited] = useState([]);
+
+  const fetchCursuri = async () => {
+    try {
+      const response = await fetch(API_URL + "/cursuri/proprii", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authentication: localStorage.getItem("jwt") || "",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setCursuri(data.cursuri);
+      } else {
+        setErrorMessage(data.message || "Eroare in preluarea cursurilor");
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Eroare in preluarea cursurilor");
+    }
+  };
+
+  useEffect(() => {
+    fetchCursuri();
+  }, []);
+
+  const vizualizareCurs = (id, nume) => {
+    navigate(`/curs/${id}`, {state: {nume}})
+  }
+
+      return (
+        <div className="courses-page">
+    
+          <div className="courses-grid">
+            {!!errorMessage && <div>{errorMessage}</div>}
+
+            {(!cursuri || !Array.isArray(cursuri) || !cursuri?.length) && <div>Nu ati achizitionat niciun curs inca.</div>}
+            {cursuri?.map((curs) => (
+              <div className="course-card" key={curs.id}>
+                <img
+                  src={API_URL + "/poza/" + curs.cale_poza}
+                  alt={curs.titlu}
+                  className="course-image"
+                />
+                <h3>{curs.titlu}</h3>
+                {user?.elev == true && (
+                  <p className="author">Creator: {curs.nume}</p>
+                )}
+                <p className="cost">Cost: {curs.cost} credite</p>
+                <div className="rating">
+                  {"★".repeat(curs.rating)}
+                  {"☆".repeat(5 - curs.rating)}
+                </div>
+                {user?.elev && (
+                  <div className="course-actions">
+                    <button className="btn-buy" onClick={()=>vizualizareCurs(curs.id, curs.tilu)}>Vizualizeaza</button>
+                    {/* <button
+                      className="btn-favorite"
+                      onClick={() => toggleFavorite(curs.id)}
+                      title="Adaugă la favorite"
+                    >
+                      {favorited.includes(curs.id) ? "❤️" : "♡"}
+                    </button> */}
+                  </div>
+                )}
+                {user?.elev == false && <button onClick={()=>vizualizareCurs(curs.id, curs.titlu)}>Vizualizeaza</button>}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+}
+
+export default CursuriPersonaleElev

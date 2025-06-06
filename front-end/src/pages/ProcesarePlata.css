@@ -1,0 +1,77 @@
+.payment-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #eaf4fb;
+  min-height: 100vh;
+  padding: 40px 20px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.payment-box {
+  background-color: white;
+  padding: 40px 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 420px;
+}
+
+.payment-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  text-align: center;
+  color: #2f5972;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.input-group input {
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.input-row {
+  display: flex;
+  gap: 16px;
+}
+
+.input-row > div {
+  flex: 1;
+}
+
+.price-summary {
+  margin-top: 12px;
+  font-size: 15px;
+  color: #2f5972;
+}
+
+.pay-btn {
+  background-color:  rgba(47, 89, 114, 0.8) ;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pay-btn:hover {
+  background-color: #43c17e;
+}
