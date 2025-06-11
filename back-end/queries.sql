@@ -103,3 +103,59 @@ select
 (select count(*) from profesori) profesori,
 (select count(*) from cursuri) cursuri,
 (select count(*) from materiale) materiale
+
+
+
+        SELECT f.nota, f.text, f.id id_feedback, f.cale_atasament, t.*
+        FROM teme t
+        LEFT JOIN raspuns_tema r on t.id = r.id_tema AND r.email_participant = 'test10'
+        LEFT JOIN feedback f ON f.id_rasp = r.id
+        WHERE t.id_curs = 13
+
+
+
+        create table progres_materiale(email_elev TEXT, id_mat INTEGER, completat INTEGER default 1)
+
+
+SELECT total_materiale, total_completate, ((total_completate+0.0)/(total_materiale+0.0))*100 procent, medie FROM (
+(SELECT count(*) total_materiale FROM materiale
+WHERE id_curs = 13),
+(SELECT count(*) total_completate 
+FROM materiale m
+JOIN progres_materiale p ON m.id = p.id_mat AND p.email_elev = 'test10' 
+WHERE id_curs = 13 ),
+(SELECT avg(f.nota) medie
+FROM feedback f
+JOIN raspuns_tema r ON f.id_rasp = r.id
+WHERE r.email_participant = 'test10')
+)
+
+SELECT f.nota
+FROM feedback f
+JOIN raspuns_tema r ON f.id_rasp = r.id
+WHERE r.email_participant = 'test10'
+
+SELECT f.nota
+  FROM feedback f
+  JOIN raspuns_tema r ON f.id_rasp = r.id
+  JOIN teme t on t.id = r.id_tema
+  JOIN cursuri c on c.id = t.id_curs
+  WHERE r.email_participant = 'test10' AND c.id = 13
+
+
+  create table favorite(id integer PRIMARY KEY  AUTOINCREMENT, email_elev text, id_curs integer) 
+
+
+
+            SELECT c.*, p.nume, f.id favorite
+            FROM cursuri c
+            JOIN profesori p
+            ON c.email_profesor = p.email
+            LEFT JOIN favorite f ON f.id_curs = c.id
+
+
+
+
+
+
+

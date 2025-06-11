@@ -19,6 +19,14 @@ export default function CreareTema() {
                 if(!file){
                     alert("Alegeti un fisier")
                 }
+
+                const today = new Date()
+                .toLocaleString("sv-SE", { timeZone: "Europe/Bucharest" })
+                .split(" ")[0]
+                if(deadline < today){
+                  alert("Termenul nu poate fi in trecut")
+                }
+              
     
                 const formData = new FormData()
                 formData.append('atasament', file)

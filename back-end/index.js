@@ -321,10 +321,11 @@ app.get("/cursuri/:tip", verifyTokenMiddleware, async (req, res) => {
     if (tip == "toate") {
       if (elev) {
         cursuri = await db.all(`
-            SELECT c.*, p.nume
+          SELECT c.*, p.nume, f.id favorit
             FROM cursuri c
             JOIN profesori p
             ON c.email_profesor = p.email
+            LEFT JOIN favorite f ON f.id_curs = c.id
             `);
       } else {
         cursuri = await db.all(
@@ -373,10 +374,12 @@ app.get("/materiale/:idCurs", verifyTokenMiddleware, async (req, res) => {
 
     const materiale = await db.all(
       `
-            SELECT *
-            FROM materiale
+            SELECT m.*, p.completat
+            FROM materiale m
+            LEFT JOIN progres_materiale p ON m.id = p.id_mat AND p.email_elev = ?
             WHERE id_curs = ?
             `,
+            email,
       idCurs
     );
 
@@ -437,14 +440,29 @@ app.get("/teme/:idCurs", verifyTokenMiddleware, async (req, res) => {
       .toLocaleString("sv-SE", { timeZone: "Europe/Bucharest" })
       .split("T")[0];
 
-    const teme = await db.all(`
+    if (!elev) {
+      const teme = await db.all(
+        `
+        SELECT  t.*
+        FROM teme t
+        WHERE t.id_curs = ? 
+            `,
+        idCurs
+      );
+
+      return res.status(200).json({ teme });
+    }
+
+    const teme = await db.all(
+      `
         SELECT f.nota, f.text, f.id id_feedback, f.cale_atasament, t.*
         FROM teme t
-        LEFT JOIN raspuns_tema r on t.id = r.id_tema
+        LEFT JOIN raspuns_tema r on t.id = r.id_tema AND r.email_participant = ?
         LEFT JOIN feedback f ON f.id_rasp = r.id
-        WHERE t.id_curs = ?
+        WHERE t.id_curs = ? 
             `,
-      idCurs
+      email, idCurs
+      
     );
 
     return res.status(200).json({ teme });
@@ -461,14 +479,17 @@ app.get("/teme", verifyTokenMiddleware, async (req, res) => {
       return res.status(400).json("Neautorizat");
     }
 
-    const teme = await db.all(`
+    const teme = await db.all(
+      `
       SELECT r.*, r.id id_rasp, c.*, t.*, e.nume FROM raspuns_tema r
         JOIN teme t ON t.id = r.id_tema
         JOIN cursuri c ON c.id = t.id_curs
         JOIN elevi e ON e.email = r.email_participant
         WHERE c.email_profesor = ?
         AND r.id NOT IN ( SELECT id_rasp FROM feedback)
-      `,email);
+      `,
+      email
+    );
 
     return res.status(200).json({ teme });
   } catch (error) {
@@ -481,27 +502,33 @@ app.get("/raspuns/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log(id)
+    console.log(id);
 
-    const raspuns = await db.get(`
+    const raspuns = await db.get(
+      `
       SELECT * FROM raspuns_tema r
         JOIN elevi e on e.email = r.email_participant
 
         WHERE r.id = ?
-      `, id)
+      `,
+      id
+    );
 
-      if(!raspuns){
-        return res.status(400).json("Raspunsul nu a fost gasit");
-      }
+    if (!raspuns) {
+      return res.status(400).json("Raspunsul nu a fost gasit");
+    }
 
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${raspuns.nume}.${raspuns?.tip_atasament}"`
+    );
+    res.setHeader("Content-Type", "application/octet-stream");
 
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="${raspuns.nume}.${raspuns?.tip_atasament}"`
-      );
-      res.setHeader("Content-Type", "application/octet-stream");
-
-    const caleServer = path.join(__dirname, "teme", `${raspuns.cale_atasament}.${raspuns?.tip_atasament}`);
+    const caleServer = path.join(
+      __dirname,
+      "teme",
+      `${raspuns.cale_atasament}.${raspuns?.tip_atasament}`
+    );
 
     const stream = fs.createReadStream(caleServer.toString());
     stream.on("error", () => {
@@ -518,27 +545,33 @@ app.get("/feedback/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log(id)
+    console.log(id);
 
-    const raspuns = await db.get(`
+    const raspuns = await db.get(
+      `
       SELECT f.*, t.titlu FROM feedback f
         JOIN raspuns_tema r ON r.id = f.id_rasp
         JOIN teme t on r.id_tema = t.id
         WHERE f.id = ?
-      `, id)
+      `,
+      id
+    );
 
-      if(!raspuns){
-        return res.status(400).json("Raspunsul nu a fost gasit");
-      }
+    if (!raspuns) {
+      return res.status(400).json("Raspunsul nu a fost gasit");
+    }
 
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${raspuns.titlu}.${raspuns?.tip_atasament}"`
+    );
+    res.setHeader("Content-Type", "application/octet-stream");
 
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="${raspuns.titlu}.${raspuns?.tip_atasament}"`
-      );
-      res.setHeader("Content-Type", "application/octet-stream");
-
-    const caleServer = path.join(__dirname, "feedback", `${raspuns.cale_atasament}.${raspuns?.tip_atasament}`);
+    const caleServer = path.join(
+      __dirname,
+      "feedback",
+      `${raspuns.cale_atasament}.${raspuns?.tip_atasament}`
+    );
 
     const stream = fs.createReadStream(caleServer.toString());
     stream.on("error", () => {
@@ -551,7 +584,8 @@ app.get("/feedback/:id", async (req, res) => {
   }
 });
 
-app.post("/tema/:id",
+app.post(
+  "/tema/:id",
   verifyTokenMiddleware,
   upload.single("tema"),
   async (req, res) => {
@@ -734,7 +768,8 @@ app.post(
   }
 );
 
-app.post("/feedback",
+app.post(
+  "/feedback",
   verifyTokenMiddleware,
   upload.single("atasament"),
   async (req, res) => {
@@ -763,7 +798,7 @@ app.post("/feedback",
         nota
       );
 
-      if(fileBuffer){
+      if (fileBuffer) {
         fs.writeFileSync(
           path.join(__dirname, "feedback", `${uuid}.${tip}`),
           fileBuffer
@@ -799,9 +834,80 @@ app.post("/plata/:credite", verifyTokenMiddleware, async (req, res) => {
   }
 });
 
+app.post("/achizitionare/:idCurs", verifyTokenMiddleware, async (req, res) => {
+  try {
+    const { sub: email, elev } = req.decoded;
+    const { idCurs } = req.params;
+
+    if (!idCurs) {
+      return res.status(400).json("Este necesar un id de curs");
+    }
+
+    const curs = await db.get(
+      `
+      SELECT * FROM cursuri WHERE id = ?
+      `,
+      idCurs
+    );
+
+    if (!curs) {
+      return res.status(404).json("Cursul nu exista");
+    }
+
+    const cont = await db.get(
+      `
+      SELECT * FROM elevi WHERE email = ?
+      `,
+      email
+    );
+
+    if (curs.cost > cont.credite) {
+      return res.status(404).json("Nu aveti suficiente credite");
+    }
+
+    const part = await db.get(
+      `
+      SELECT * FROM participanti
+      WHERE email_participant = ? AND id_curs = ?
+      `,
+      email,
+      idCurs
+    );
+
+    if (part) {
+      return res.status(404).json("Deja participati la acest curs");
+    }
+
+    await db.run(
+      `
+      INSERT INTO participanti
+      VALUES ( ?, ?, ?)
+      `,
+      email,
+      idCurs,
+      new Date()
+        .toLocaleString("sv-SE", { timeZone: "Europe/Bucharest" })
+        .split("T")[0]
+    );
+
+    await db.run(
+      `
+        UPDATE elevi
+        SET credite = credite - ?
+        WHERE email = ?
+        `,
+      curs.cost,
+      email
+    );
+    return res.status(200).json("Curs achizitionat cu succes");
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json("Eroare de server");
+  }
+});
+
 app.get("/statistici", async (req, res) => {
   try {
-
     const statistici = await db.get(`
       select 
         (select count(*) from elevi) elevi,
@@ -810,30 +916,120 @@ app.get("/statistici", async (req, res) => {
         (select count(*) from materiale) materiale
       `);
 
-    return res.status(201).json({statistici});
+    return res.status(201).json({ statistici });
   } catch (error) {
     console.error(error);
     return res.status(500).json("Eroare de server");
   }
 });
 
-app.post("/plata/:credite", verifyTokenMiddleware, async (req, res) => {
+app.post("/progres/:idMaterial", verifyTokenMiddleware , async (req, res) => {
+  try {
+    const {idMaterial} = req.params
+    const { sub: email, elev } = req.decoded;
+    if(!idMaterial){
+      return res.status(400).json('Lipseste id material')
+    }
+
+    await db.run(`
+      INSERT INTO progres_materiale
+      VALUES (?, ?, 1)
+      `,email, idMaterial)
+
+    return res.status(201).json('Succes');
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Eroare de server");
+  }
+});
+
+
+app.get("/progres/:idCurs", verifyTokenMiddleware , async (req, res) => {
+  try {
+    const {idCurs} = req.params
+    const { sub: email, elev } = req.decoded;
+
+    const totaluri = await db.get(`
+      SELECT total_materiale, total_completate, ((total_completate+0.0)/(total_materiale+0.0))*100 procent, medie FROM (
+        (SELECT count(*) total_materiale FROM materiale
+        WHERE id_curs = ?),
+
+        (SELECT count(*) total_completate 
+        FROM materiale m
+        JOIN progres_materiale p ON m.id = p.id_mat AND p.email_elev = ?
+        WHERE id_curs = ? ),
+
+        (SELECT avg(f.nota) medie
+        FROM feedback f
+        JOIN raspuns_tema r ON f.id_rasp = r.id
+        JOIN teme t on t.id = r.id_tema
+        JOIN cursuri c on c.id = t.id_curs
+        WHERE r.email_participant = ? AND c.id = ?)
+      )
+      `,idCurs, email, idCurs, email, idCurs)
+
+    const note = await db.all(`
+      SELECT f.nota, t.titlu
+        FROM feedback f
+        JOIN raspuns_tema r ON f.id_rasp = r.id
+        JOIN teme t on t.id = r.id_tema
+        JOIN cursuri c on c.id = t.id_curs
+        WHERE r.email_participant = ? AND c.id = ?
+      `, email, idCurs)
+
+    return res.status(201).json({...totaluri, note});
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Eroare de server");
+  }
+});
+
+app.post("/favorite/:idCurs", verifyTokenMiddleware , async (req, res) => {
+  try {
+    const {idCurs} = req.params
+    const { sub: email, elev } = req.decoded;
+
+    await db.run(`
+      INSERT INTO favorite (email_elev , id_curs)
+      VALUES (?, ?)
+      `,email, idCurs)
+
+    return res.status(201).json('Succes!');
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Eroare de server");
+  }
+});
+
+app.delete("/favorite/:idCurs", verifyTokenMiddleware , async (req, res) => {
+  try {
+    const {idCurs} = req.body
+    const { sub: email, elev } = req.decoded;
+
+    await db.run(`
+      DELETE FROM favorite WHERE email_elev = ? AND id_curs = ?
+      `,email, idCurs)
+
+    return res.status(201).json('Succes!');
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Eroare de server");
+  }
+});
+
+app.get("/favorite", verifyTokenMiddleware , async (req, res) => {
   try {
     const { sub: email, elev } = req.decoded;
-    const { credite } = req.params;
 
-    await db.run(
-      `
-        UPDATE elevi
-        SET credite = credite + ?
-        WHERE email = ?
-        `,
-      credite,
-      email
-    );
-    return res.status(200).json({ success: true });
+    const cursuri = await db.all(`
+      SELECT * FROM favorite
+      WHERE email_elev = ? 
+      
+      `,email)
+
+    return res.status(201).json(cursuri);
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
     return res.status(500).json("Eroare de server");
   }
 });

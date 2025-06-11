@@ -6,7 +6,8 @@ import './Header.css';
 import logo from '../../assets/logo.png';
 import Drawer from '../Drawer/Drawer';
 import { useNavigate } from 'react-router-dom';
-
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 export default function Header({ user, refreshHeader }) {
   const navigate = useNavigate();
   const isLoggedIn = Object.keys(user)!=0;
@@ -52,6 +53,25 @@ export default function Header({ user, refreshHeader }) {
           {isLoggedIn && user.elev && (
             <>
             {path == '/cursuri' && <span>Credite : {user?.credite || 0}</span>}
+             <IconButton
+              onClick={() => navigate('/cursuri')}
+              size="large"
+              edge="end"
+              color="inherit"
+              aria-label="browse courses"
+            >
+              <LibraryBooksIcon />
+            </IconButton>
+            <IconButton
+              onClick={() => navigate('/cursuri-personale')}
+              size="large"
+              edge="end"
+              color="inherit"
+              aria-label="my courses"
+            >
+              <MenuBookIcon />
+            </IconButton>
+           
               <IconButton onClick={() => navigate('/favorite')}>
                 <FavoriteBorderIcon sx={{ color: '#ced7e0' }} />
               </IconButton>

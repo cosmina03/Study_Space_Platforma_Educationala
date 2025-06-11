@@ -17,6 +17,7 @@ import CursuriPersonaleElev from './pages/CursuriPersoanaleElev.jsx';
 import PaginaFinante from './pages/PaginaFinante.jsx';
 import TemeProfesor from './pages/TemeProfesor.jsx';
 import Feedback from './pages/Feedback.jsx';
+import PaginaFavorite from './pages/PaginaFavorite.jsx';
 function App() {
   const [user, setUser] = useState({});
 
@@ -25,6 +26,7 @@ function App() {
   }, []);
 
   const refreshHeader  = () => {
+    console.log('refresh')
     const storedUser = localStorage.getItem("userData");
     if (storedUser) {
       try {
@@ -42,12 +44,12 @@ function App() {
   return (
     <Router>
       <div>
-        { <Header user={user} refreshHeader={refreshHeader}/>}
+         <Header user={user} refreshHeader={refreshHeader}/>
       
         <Routes>
           <Route path="/" element={<HomePage user={user} />} />
           <Route path="/autentificare" element={<LoginSignUp setUser={setUser} refreshHeader={refreshHeader}/>} />
-          <Route path="/cursuri" element={<Cursuri user={user}/>} />
+          <Route path="/cursuri" element={<Cursuri user={user} refreshHeader={refreshHeader}/>} />
           <Route path="/creare-curs" element={<CreareCurs user={user}/>} />
           <Route path="/curs/:id" element={<CursProfesorPagina user={user}/>} />
           <Route path="curs/:id/creare-material" element={<CreareMaterial user={user}/>}/>
@@ -60,6 +62,7 @@ function App() {
           <Route path="/finante" element={<PaginaFinante />} />
           <Route path="/teme" element={<TemeProfesor user={user}/>} />
           <Route path="/feedback" element={<Feedback user={user}/>} />
+          <Route path="/favorite" element={<PaginaFavorite user={user} refreshHeader={refreshHeader}/>} />
         </Routes>
       </div>
     </Router>

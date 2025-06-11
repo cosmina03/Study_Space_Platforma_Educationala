@@ -5,55 +5,8 @@ import { API_URL } from "../constants.js";
 
 const SURSA_POZA = "http://localhost:8080/poza";
 
-// const cursuri = [
-//   {
-//     id: 1,
-//     titlu: 'Matematica',
-//     descriere: 'Algebra și geometrie',
-//     cost: 1,
-//     autor: 'Prof. Popescu',
-//     rating: 5,
-//     imagine: 'https://tse1.mm.bing.net/th?id=OIP.ustJ1qBygKs3rjqKXOkcXgHaE7&pid=Api&P=0&h=220'
-//   },
-//   {
-//     id: 2,
-//     titlu: 'Fizica',
-//     descriere: 'Mecanică clasică',
-//     cost: 2,
-//     autor: 'Prof. Ionescu',
-//     rating: 4,
-//     imagine: 'https://via.placeholder.com/300x100?text=Fizica'
-//   },
-//   {
-//     id: 3,
-//     titlu: 'Informatica',
-//     descriere: 'JavaScript pentru începători',
-//     cost: 3,
-//     autor: 'Prof. Marin',
-//     rating: 5,
-//     imagine: 'https://via.placeholder.com/300x100?text=Informatica'
-//   },
-//   {
-//     id: 4,
-//     titlu: 'Chimie',
-//     descriere: 'Reacții chimice de bază',
-//     cost: 1,
-//     autor: 'Prof. Enache',
-//     rating: 3,
-//     imagine: 'https://via.placeholder.com/300x100?text=Chimie'
-//   },
-//   {
-//     id: 5,
-//     titlu: 'Biologie',
-//     descriere: 'Structura celulei și genetica',
-//     cost: 2,
-//     autor: 'Prof. Ilie',
-//     rating: 4,
-//     imagine: 'https://via.placeholder.com/300x100?text=Biologie'
-//   },
-// ];
 
-const Cursuri = ({ user }) => {
+const Cursuri = ({ user, refreshHeader}) => {
   const navigate = useNavigate();
   const [cursuri, setCursuri] = useState([]);
   const [cursuriFiltrate, setCursuriFiltrate] = useState([])
@@ -86,6 +39,7 @@ const Cursuri = ({ user }) => {
   };
 
   useEffect(() => {
+    refreshHeader()
     fetchCursuri();
   }, []);
 
@@ -93,10 +47,40 @@ const Cursuri = ({ user }) => {
     navigate(`/curs/${id}`, {state: {nume}})
   }
 
+  const addToFavorites = async (id) => {
+    try {
+      const response = await fetch(API_URL + `/favorite/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authentication: localStorage.getItem("jwt") || "",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setCursuri(prev=>{
+          const newCursuri = [...cursuri]
+          const curs = newCursuri.find(c=>c.id == id)
+          if(curs){
+            curs.favorit = 1
+          }
+          return newCursuri
+        });
+      } 
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   const toggleFavorite = (id) => {
-    setFavorited((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    );
+      const curs = cursuri.find(c=>c.id == id)
+      if(curs?.favorit){
+        
+      }else{
+        addToFavorites(id)
+      }
   };
 
   const handleBuy = async (curs) => {
@@ -111,9 +95,10 @@ const Cursuri = ({ user }) => {
 
       const data = await response.json();
       if (response.ok) {
+        refreshHeader()
         alert(data)
         const newData = {...user}
-        newData.credite = newData.credite- curs.cost
+        newData.credite = newData.credite - curs.cost
         localStorage.setItem('userData', JSON.stringify(newData))
         navigate('/cursuri-personale')
       } else {
@@ -181,7 +166,7 @@ const Cursuri = ({ user }) => {
                   onClick={() => toggleFavorite(curs.id)}
                   title="Adaugă la favorite"
                 >
-                  {favorited.includes(curs.id) ? "❤️" : "♡"}
+                  {curs.favorit ? "❤️" : "♡"}
                 </button>
               </div>
             )}
