@@ -155,7 +155,40 @@ SELECT f.nota
 
 
 
+CREATE TABLE rating(
+        id_curs integer,
+        email_elev text,
+        rating tinyint,
+        primary key(id_curs, email_elev)
+);
+
+drop table rating
+
+Select count(*), luna from 
+(
+  SELECT substr(data_aderare, 6, 2) luna
+  FROM participanti p
+  JOIN cursuri c ON c.id = p.id_curs
+  WHERE c.email_profesor = 'cosmina@gmail.com'
+)
+GROUP by luna
 
 
+SELECT substr(data_aderare, 6, 2) luna, c.cost* count(p.email_participant) venit, count(p.email_participant) elevi
+FROM participanti p
+  JOIN cursuri c ON c.id = p.id_curs
+  WHERE c.email_profesor = 'cosmina@gmail.com'
+  group by  luna
 
+    const topCursuri = [
+    { titlu: 'Programare în Python', cumparatori: 45, incasari: 450 },
+    { titlu: 'Bazele Economiei', cumparatori: 30, incasari: 300 },
+    { titlu: 'JavaScript pentru Începători', cumparatori: 28, incasari: 280 }
+  ];
+
+
+SELECT count(distinct p.email_participant) total_elevi_unici
+FROM participanti p
+  JOIN cursuri c ON c.id = p.id_curs
+  WHERE c.email_profesor = 'cosmina@gmail.com'
 

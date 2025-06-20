@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import "./Cursuri.css";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../constants.js";
+import filledStar from "../assets/filled-star.svg";
 
 const SURSA_POZA = "http://localhost:8080/poza";
 
-
-const Cursuri = ({ user, refreshHeader}) => {
+const Cursuri = ({ user, refreshHeader }) => {
   const navigate = useNavigate();
   const [cursuri, setCursuri] = useState([]);
-  const [cursuriFiltrate, setCursuriFiltrate] = useState([])
-  const [search, setSearch] = useState('')
+  const [cursuriFiltrate, setCursuriFiltrate] = useState([]);
+  const [search, setSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [favorited, setFavorited] = useState([]);
 
@@ -39,13 +39,13 @@ const Cursuri = ({ user, refreshHeader}) => {
   };
 
   useEffect(() => {
-    refreshHeader()
+    refreshHeader();
     fetchCursuri();
   }, []);
 
   const vizualizareCurs = (id, nume) => {
-    navigate(`/curs/${id}`, {state: {nume}})
-  }
+    navigate(`/curs/${id}`, { state: { nume } });
+  };
 
   const addToFavorites = async (id) => {
     try {
@@ -57,34 +57,57 @@ const Cursuri = ({ user, refreshHeader}) => {
         },
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        setCursuri(prev=>{
-          const newCursuri = [...cursuri]
-          const curs = newCursuri.find(c=>c.id == id)
-          if(curs){
-            curs.favorit = 1
+        setCursuri((prev) => {
+          const newCursuri = [...prev];
+          const curs = newCursuri.find((c) => c.id == id);
+          if (curs) {
+            curs.favorit = 1;
           }
-          return newCursuri
+          return newCursuri;
         });
-      } 
+      }
     } catch (error) {
       console.error(error);
     }
-  }
+  };
+
+  const removeToFavorites = async (id) => {
+    try {
+      const response = await fetch(API_URL + `/favorite/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authentication: localStorage.getItem("jwt") || "",
+        },
+      });
+
+      if (response.ok) {
+        setCursuri((prev) => {
+          const newCursuri = [...prev];
+          const curs = newCursuri.find((c) => c.id == id);
+          if (curs) {
+            curs.favorit = false;
+          }
+          return newCursuri;
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const toggleFavorite = (id) => {
-      const curs = cursuri.find(c=>c.id == id)
-      if(curs?.favorit){
-        
-      }else{
-        addToFavorites(id)
-      }
+    const curs = cursuri.find((c) => c.id == id);
+    if (curs?.favorit) {
+      removeToFavorites(id);
+    } else {
+      addToFavorites(id);
+    }
   };
 
   const handleBuy = async (curs) => {
-        try {
+    try {
       const response = await fetch(API_URL + `/achizitionare/${curs.id}`, {
         method: "POST",
         headers: {
@@ -95,12 +118,12 @@ const Cursuri = ({ user, refreshHeader}) => {
 
       const data = await response.json();
       if (response.ok) {
-        refreshHeader()
-        alert(data)
-        const newData = {...user}
-        newData.credite = newData.credite - curs.cost
-        localStorage.setItem('userData', JSON.stringify(newData))
-        navigate('/cursuri-personale')
+        refreshHeader();
+        alert(data);
+        const newData = { ...user };
+        newData.credite = newData.credite - curs.cost;
+        localStorage.setItem("userData", JSON.stringify(newData));
+        navigate("/cursuri-personale");
       } else {
         alert(data || "Eroare in achizitonarea cursului");
       }
@@ -108,26 +131,25 @@ const Cursuri = ({ user, refreshHeader}) => {
       console.error(error);
       alert("Eroare in achizitonarea cursului");
     }
-  }
+  };
 
-  useEffect(()=>{
-    setCursuriFiltrate(()=>{
-
-      const parti = search.toLowerCase().split(' ')
-      return cursuri.filter(curs=>parti.every(parte=>
-        `${curs.titlu} ${curs.descriere} ${curs.nume}`
-        .toLowerCase()
-        .replace(/ă/g, 'a')
-        .replace(/â/g, 'a')
-        .replace(/î/g, 'i')
-        .replace(/ț/g, 't')
-        .replace(/ș/g, 's')
-        .includes(parte)))
-
-    })
-
-    
-  }, [search])
+  useEffect(() => {
+    setCursuriFiltrate(() => {
+      const parti = search.toLowerCase().split(" ");
+      return cursuri.filter((curs) =>
+        parti.every((parte) =>
+          `${curs.titlu} ${curs.descriere} ${curs.nume}`
+            .toLowerCase()
+            .replace(/ă/g, "a")
+            .replace(/â/g, "a")
+            .replace(/î/g, "i")
+            .replace(/ț/g, "t")
+            .replace(/ș/g, "s")
+            .includes(parte)
+        )
+      );
+    });
+  }, [search]);
 
   return (
     <div className="courses-page">
@@ -135,7 +157,12 @@ const Cursuri = ({ user, refreshHeader}) => {
         <>
           <h1 className="courses-title">Explorează cursurile</h1>
           <div className="search-bar">
-            <input type="text" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
         </>
       )}
@@ -154,13 +181,17 @@ const Cursuri = ({ user, refreshHeader}) => {
               <p className="author">Creator: {curs.nume}</p>
             )}
             <p className="cost">Cost: {curs.cost} credite</p>
-            <div className="rating">
-              {"★".repeat(curs.rating)}
-              {"☆".repeat(5 - curs.rating)}
-            </div>
+
+            {curs.rating && <div>
+              <img src={filledStar} />
+              <span>{(+curs.rating).toFixed(1)}</span>
+            </div>}
+
             {user?.elev && (
               <div className="course-actions">
-                <button className="btn-buy" onClick={()=>handleBuy(curs)}>Achiziționează</button>
+                <button className="btn-buy" onClick={() => handleBuy(curs)}>
+                  Achiziționează
+                </button>
                 <button
                   className="btn-favorite"
                   onClick={() => toggleFavorite(curs.id)}
@@ -170,7 +201,11 @@ const Cursuri = ({ user, refreshHeader}) => {
                 </button>
               </div>
             )}
-            {user?.elev == false && <button onClick={()=>vizualizareCurs(curs.id, curs.titlu)}>Vizualizeaza</button>}
+            {user?.elev == false && (
+              <button onClick={() => vizualizareCurs(curs.id, curs.titlu)}>
+                Vizualizeaza
+              </button>
+            )}
           </div>
         ))}
       </div>

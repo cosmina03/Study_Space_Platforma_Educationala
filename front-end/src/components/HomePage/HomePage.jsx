@@ -10,7 +10,6 @@ export default function HomePage({ user }) {
   const [subtext, setSubtext] = useState("Conectează-te pentru a descoperi o experiență educațională completă.");
   const navigate = useNavigate();
 
-  // Setăm subtext-ul în funcție de tipul de utilizator (elev / profesor)
   useEffect(() => {
     const userDataString = localStorage.getItem("userData");
     if (userDataString) {
@@ -27,10 +26,7 @@ export default function HomePage({ user }) {
     }
   }, []);
 
-  // Starea în care vom păstra statisticile (elevi, profesori, cursuri, materiale)
   const [stat, setStat] = useState({});
-
-  // Funcție pentru a aduce datele de pe API
   const fetchStatistici = async () => {
     try {
       const response = await fetch(API_URL + "/statistici", {
@@ -50,8 +46,6 @@ export default function HomePage({ user }) {
       console.error(error);
     }
   };
-
-  // Când componenta se montează, apelăm API-ul pentru statistici
   useEffect(() => {
     fetchStatistici();
   }, []);
@@ -78,10 +72,9 @@ export default function HomePage({ user }) {
         Descoperă cursurile
       </button>
 
-      {/* --- SECȚIUNEA DE STATISTICI (grafic) --- */}
       <div className="stats-section">
         <h3 className="stats-heading">De ce StudySpace?</h3>
-        {/* Aici afișăm componentele Recharts */}
+        
         <StatisticiChart stat={stat} />
       </div>
     </div>

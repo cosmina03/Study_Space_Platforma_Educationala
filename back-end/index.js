@@ -321,7 +321,10 @@ app.get("/cursuri/:tip", verifyTokenMiddleware, async (req, res) => {
     if (tip == "toate") {
       if (elev) {
         cursuri = await db.all(`
-          SELECT c.*, p.nume, f.id favorit
+          SELECT c.*, p.nume, f.id favorit, 
+          (SELECT AVG(rating)
+          FROM rating r
+          WHERE r.id_curs = c.id) rating
             FROM cursuri c
             JOIN profesori p
             ON c.email_profesor = p.email
@@ -341,11 +344,12 @@ app.get("/cursuri/:tip", verifyTokenMiddleware, async (req, res) => {
       //proprii
       if (elev) {
         cursuri = await db.all(`
-            SELECT c.*, p.nume
+            SELECT c.*, p.nume, r.rating rating
             FROM cursuri c
             JOIN profesori p, participanti pa
             ON c.email_profesor = p.email
             AND pa.id_curs = c.id
+            LEFT JOIN rating r ON r.id_curs = c.id
             `);
       } else {
         cursuri = await db.all(
@@ -923,6 +927,49 @@ app.get("/statistici", async (req, res) => {
   }
 });
 
+app.get("/finante", verifyTokenMiddleware,async (req, res) => {
+  try {
+    const { sub: email, elev } = req.decoded;
+    const statisticiLunare = await db.all(`
+      SELECT substr(data_aderare, 6, 2) luna, c.cost* count(p.email_participant) venit, count(p.email_participant) elevi
+      FROM participanti p
+        JOIN cursuri c ON c.id = p.id_curs
+        WHERE c.email_profesor = ?
+        group by luna
+      `, email);
+    
+      const topCursuri = await db.all(`
+      SELECT c.titlu, c.id, c.cost* count(p.email_participant) venit, count(p.email_participant) elevi
+      FROM participanti p
+        JOIN cursuri c ON c.id = p.id_curs
+        WHERE c.email_profesor = ?
+        group by id, titlu
+        order by venit desc
+        limit 3
+      `, email);
+
+      const totalElevi = await db.get(`
+      SELECT  count(p.email_participant) total_elevi
+      FROM participanti p
+        JOIN cursuri c ON c.id = p.id_curs
+        WHERE c.email_profesor = ?
+      `, email);
+
+      const totalEleviUnici = await db.get(`
+      SELECT  count( distinct p.email_participant) total_elevi_unici
+      FROM participanti p
+        JOIN cursuri c ON c.id = p.id_curs
+        WHERE c.email_profesor = ?
+      `, email);
+
+    return res.status(201).json({ statisticiLunare, topCursuri, ...totalElevi, ...totalEleviUnici });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Eroare de server");
+  }
+});
+
+
 app.post("/progres/:idMaterial", verifyTokenMiddleware , async (req, res) => {
   try {
     const {idMaterial} = req.params
@@ -1003,7 +1050,7 @@ app.post("/favorite/:idCurs", verifyTokenMiddleware , async (req, res) => {
 
 app.delete("/favorite/:idCurs", verifyTokenMiddleware , async (req, res) => {
   try {
-    const {idCurs} = req.body
+    const {idCurs} = req.params
     const { sub: email, elev } = req.decoded;
 
     await db.run(`
@@ -1022,7 +1069,10 @@ app.get("/favorite", verifyTokenMiddleware , async (req, res) => {
     const { sub: email, elev } = req.decoded;
 
     const cursuri = await db.all(`
-      SELECT * FROM favorite
+      SELECT f.*, c.*
+      FROM favorite f
+      JOIN cursuri c
+      ON c.id = f.id_curs
       WHERE email_elev = ? 
       
       `,email)
@@ -1033,6 +1083,27 @@ app.get("/favorite", verifyTokenMiddleware , async (req, res) => {
     return res.status(500).json("Eroare de server");
   }
 });
+
+
+app.post("/rating/:idCurs/:rating", verifyTokenMiddleware , async (req, res) => {
+  try {
+    const {idCurs, rating} = req.params
+    const { sub: email, elev } = req.decoded;
+
+    await db.run(`
+      INSERT INTO rating (id_curs, email_elev, rating)
+      VALUES (?, ?, ?)
+      ON CONFLICT(id_curs, email_elev) DO UPDATE
+      SET rating = excluded.rating
+      `,idCurs, email, +rating)
+
+    return res.status(201).json('Succes!');
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Eroare de server");
+  }
+});
+
 
 app.listen(PORT, async () => {
   const pornitDb = await startDB();

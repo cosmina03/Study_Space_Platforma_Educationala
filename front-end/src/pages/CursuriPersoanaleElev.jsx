@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import "./CursuriPersonaleElev.css";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../constants.js";
+import emptyStar from '../assets/empty-star.svg'
+import filledStar from '../assets/filled-star.svg'
 
+const MAX_STARS = 5
 
 const CursuriPersonaleElev = ({user}) => {
   const navigate = useNavigate();
   const [cursuri, setCursuri] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
-  const [favorited, setFavorited] = useState([]);
 
   const fetchCursuri = async () => {
     try {
@@ -41,6 +43,29 @@ const CursuriPersonaleElev = ({user}) => {
     navigate(`/curs/${id}`, {state: {nume}})
   }
 
+  const handleStarClick = async (newRating, idCurs) => {
+        try {
+      const response = await fetch(API_URL + `/rating/${idCurs}/${newRating}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authentication: localStorage.getItem("jwt") || "",
+        },
+      });
+
+      if (response.ok) {
+        setCursuri(prev=>{
+          const newCursuri = [...prev]
+          const curs = newCursuri.find(curs=>curs.id === idCurs)
+          curs.rating = newRating
+          return newCursuri
+        })
+      } 
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
       return (
         <div className="courses-page">
     
@@ -60,10 +85,20 @@ const CursuriPersonaleElev = ({user}) => {
                   <p className="author">Creator: {curs.nume}</p>
                 )}
                 <p className="cost">Cost: {curs.cost} credite</p>
-                <div className="rating">
-                  {"★".repeat(curs.rating)}
-                  {"☆".repeat(5 - curs.rating)}
-                </div>
+               {user.elev && curs.rating !== null && <div className="rating">
+                  {[...Array(curs.rating).keys()].map(item => 
+                      <img src={filledStar} onClick={()=>handleStarClick(item+1, curs.id)}/>
+                  )}
+                  {[...Array(MAX_STARS - curs.rating).keys()].map(item => 
+                      <img src={emptyStar} onClick={()=>handleStarClick(curs.rating+item+1, curs.id)}/>
+                  )}
+                </div>}
+                {user.elev && curs.rating === null && <div className="rating">
+                  {[...Array(MAX_STARS).keys()].map(item => 
+                      <img src={emptyStar} onClick={()=>handleStarClick(curs.rating+item+1, curs.id)}/>
+                  )}
+                </div>}
+
                 {user?.elev && (
                   <div className="course-actions">
                     <button className="btn-buy" onClick={()=>vizualizareCurs(curs.id, curs.tilu)}>Vizualizeaza</button>

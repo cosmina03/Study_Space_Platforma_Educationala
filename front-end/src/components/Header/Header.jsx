@@ -1,13 +1,25 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Avatar, Button, IconButton } from '@mui/material';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import './Header.css';
+import { AppBar,
+   Toolbar,
+    Typography, 
+    Avatar, 
+    Button, 
+    IconButton } from '@mui/material';
+
+import FavoriteBorderIcon 
+from '@mui/icons-material/FavoriteBorder';
+import ShoppingCartIcon 
+from '@mui/icons-material/ShoppingCart';
+import { useNavigate } 
+from 'react-router-dom';
+import MenuBookIcon 
+from '@mui/icons-material/MenuBook';
+import LibraryBooksIcon 
+from '@mui/icons-material/LibraryBooks';
 import logo from '../../assets/logo.png';
 import Drawer from '../Drawer/Drawer';
-import { useNavigate } from 'react-router-dom';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+
 export default function Header({ user, refreshHeader }) {
   const navigate = useNavigate();
   const isLoggedIn = Object.keys(user)!=0;

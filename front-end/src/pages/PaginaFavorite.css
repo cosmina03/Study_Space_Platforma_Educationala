@@ -1,0 +1,125 @@
+.courses-page {
+  padding: 60px 30px;
+  max-width: 1200px;
+  margin: auto;
+  text-align: center;
+}
+
+.courses-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #2f5972;
+  margin-bottom: 30px;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.search-bar input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 18px;
+  border-radius: 50px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  background-color: #f1f1f1;
+  outline: none;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+.course-card {
+  background-color: #2f5972;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.course-image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.course-card h3 {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.course-card .author,
+.course-card .cost {
+  color: #d1e4ee;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.rating {
+  font-size: 18px;
+  color: gold;
+  margin: 10px 0;
+}
+
+.course-card button {
+  background-color: #ced7e0;
+  color: #2f5972;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.course-card button:hover {
+  background-color: #9ccddc;
+}
+.course-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-buy {
+  background-color: #2f5972;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.3s ease;
+}
+
+.btn-buy:hover {
+  background-color: #24475d;
+}
+
+.btn-favorite {
+  background-color: transparent;
+  border: 2px solid #2f5972;
+  color: #2f5972;
+  font-size: 18px;
+  padding: 4px 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn-favorite:hover {
+  background-color: #2f5972;
+  color: white;
+}

@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react"
 import { API_URL } from "../constants.js";
 import { useNavigate } from "react-router-dom";
-
+import "./PaginaFavorite.css";
 const PaginaFavorite = ({user, refreshHeader}) => {
     
     const navigate = useNavigate()
     const [favorite, setFavorite] = useState([])
-    const favorited =[]
-    const toggleFavorite = ()=>{}
 
     const fetchFavorite = async () => {
         try {
@@ -58,9 +56,30 @@ const PaginaFavorite = ({user, refreshHeader}) => {
     }
   }
 
+    const removeToFavorites = async (id) => {
+    try {
+      const response = await fetch(API_URL + `/favorite/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authentication: localStorage.getItem("jwt") || "",
+        },
+      });
+
+      if (response.ok) {
+        setFavorite(prev=>{
+          const newCursuri = [...prev]
+          const cursuriFiltrate = newCursuri.filter(c=>c.id != id)
+          return cursuriFiltrate
+        });
+      } 
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
     return (
         <div className="courses-grid">
-               
                 {favorite?.map((curs) => (
                   <div className="course-card" key={curs.id}>
                     <img
@@ -82,14 +101,12 @@ const PaginaFavorite = ({user, refreshHeader}) => {
                         <button className="btn-buy" onClick={()=>handleBuy(curs)}>Achiziționează</button>
                         <button
                           className="btn-favorite"
-                          onClick={() => toggleFavorite(curs.id)}
+                          onClick={() => removeToFavorites(curs.id)}
                           title="Adaugă la favorite"
                         >
-                          {favorited.includes(curs.id) ? "❤️" : "♡"}
+                           ❤️
                         </button>
-                      </div>
-              
-                    
+                      </div>      
                   </div>
                 ))}
               </div>
