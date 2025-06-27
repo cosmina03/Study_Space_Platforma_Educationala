@@ -3,7 +3,7 @@ import "./Cursuri.css";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../constants.js";
 import filledStar from "../assets/filled-star.svg";
-
+import coin from "../assets/coin.svg";
 const SURSA_POZA = "http://localhost:8080/poza";
 
 const Cursuri = ({ user, refreshHeader }) => {
@@ -180,12 +180,14 @@ const Cursuri = ({ user, refreshHeader }) => {
             {user?.elev == true && (
               <p className="author">Creator: {curs.nume}</p>
             )}
-            <p className="cost">Cost: {curs.cost} credite</p>
-
-            {curs.rating && <div>
-              <img src={filledStar} />
-              <span>{(+curs.rating).toFixed(1)}</span>
-            </div>}
+        <p className="cost">Cost: {curs.cost} credite</p>
+        {curs.rating && (
+          <div className="course-rating">
+            <img src={filledStar} alt="rating" />
+            <span>{(+curs.rating).toFixed(1)}</span>
+          </div>
+        )}
+        
 
             {user?.elev && (
               <div className="course-actions">
@@ -215,39 +217,4 @@ const Cursuri = ({ user, refreshHeader }) => {
 
 export default Cursuri;
 
-/*
-const cursuri = [
-  { id: 1, titlu: 'Matematica', descriere: 'Curs de baza in algebra si geometrie', cost: 1 },
-  { id: 2, titlu: 'Fizica', descriere: 'Introducere in mecanica clasica', cost: 2 },
-  { id: 3, titlu: 'Informatica', descriere: 'Programare cu JavaScript', cost: 3 },
-  { id: 4, titlu: 'Chimie', descriere: 'Reactii chimice de baza', cost: 1 },
-  { id: 5, titlu: 'Biologie', descriere: 'Structura celulei si genetica', cost: 2 },
-];
 
-const Cursuri = () => {
-  
-    const navigate = useNavigate();
-
-  return (
-    <div className="courses-page">
-      <h1 className="courses-title">Courses</h1>
-      <div className="search-bar">
-        <input type="text" placeholder="Search courses..." disabled />
-      </div>
-
-      <div className="courses-grid">
-        {cursuri.map((curs) => (
-          <div className="course-card" key={curs.id}>
-            <h2>{curs.titlu}</h2>
-            <p>{curs.descriere}</p>
-            <span>Cost: {curs.cost} credite</span>
-            <button onClick={() => navigate(`/curs/${curs.id}`)}>Vizualizare</button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export default Cursuri;
-*/

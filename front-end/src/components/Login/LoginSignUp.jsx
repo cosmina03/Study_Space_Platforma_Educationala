@@ -14,9 +14,8 @@ const LoginSignUp = ({ setUser, refreshHeader }) => {
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    setErrorMessage(""); // curăță mesajul anterior
+    setErrorMessage(""); 
 
-    // validare câmpuri goale
     if (
       (isLogin && (!email || !parola)) ||
       (!isLogin && (!nume || !email || !parola))

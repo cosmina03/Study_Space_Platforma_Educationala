@@ -19,6 +19,7 @@ import LibraryBooksIcon
 from '@mui/icons-material/LibraryBooks';
 import logo from '../../assets/logo.png';
 import Drawer from '../Drawer/Drawer';
+import coin from "../../assets/coin.svg";
 
 export default function Header({ user, refreshHeader }) {
   const navigate = useNavigate();
@@ -64,7 +65,11 @@ export default function Header({ user, refreshHeader }) {
 
           {isLoggedIn && user.elev && (
             <>
-            {path == '/cursuri' && <span>Credite : {user?.credite || 0}</span>}
+            {path == '/cursuri' && 
+             <div className="course-cost">
+                      <img src={coin} alt="monedă" />
+                      <span> {user?.credite || 0}</span>
+                    </div>}
              <IconButton
               onClick={() => navigate('/cursuri')}
               size="large"

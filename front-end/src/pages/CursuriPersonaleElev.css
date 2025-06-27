@@ -68,9 +68,22 @@
 }
 
 .rating {
-  font-size: 18px;
-  color: gold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
   margin: 10px 0;
+}
+
+.rating img {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.rating img:hover {
+  transform: scale(1.2);
 }
 
 .course-card button {

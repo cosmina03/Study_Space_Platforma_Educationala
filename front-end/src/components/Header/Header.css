@@ -84,3 +84,18 @@
 .drawer {
   background-color: #ced7e0 !important;
 }
+
+.course-cost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 6px 0 12px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.course-cost img {
+  width: 20px;
+  height: 20px;
+}

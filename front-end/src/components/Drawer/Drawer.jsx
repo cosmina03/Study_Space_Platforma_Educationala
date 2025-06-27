@@ -56,7 +56,6 @@ export default function StudySpaceDrawer({refreshHeader}) {
 
   const list = (anchor) => (
     <List className="drawer-list">
-      {/* Header cu Avatar */}
       <ListItem className="drawer-item" style={{ cursor: 'default' }}>
         <ListItemIcon>
           <Avatar sx={{ bgcolor: "#9ccddc", color: "#062c43" }}>
@@ -68,19 +67,15 @@ export default function StudySpaceDrawer({refreshHeader}) {
           secondary={user?.elev ? "Elev" : "Profesor"}
         />
       </ListItem>
-
       <Divider className="drawer-divider" />
-
       <ListItem button className="drawer-item" onClick={() => navigate('/')}>
         <ListItemIcon className="drawer-icon"><Home /></ListItemIcon>
         <ListItemText primary="Pagina principală" />
       </ListItem>
-
       <ListItem button className="drawer-item" onClick={() => navigate('/cursuri-personale')}>
         <ListItemIcon className="drawer-icon"><School /></ListItemIcon>
         <ListItemText primary="Cursurile mele" />
       </ListItem>
-
       {!user.elev && (
         <ListItem button className="drawer-item" onClick={() => navigate('/teme')}>
           <ListItemIcon className="drawer-icon"><Assignment /></ListItemIcon>
@@ -88,23 +83,18 @@ export default function StudySpaceDrawer({refreshHeader}) {
         </ListItem>
         
       )}
-
       {!user.elev && (<ListItem button className="drawer-item" onClick={() => navigate('/finante')}>
         <ListItemIcon className="drawer-icon"><MonetizationOn /></ListItemIcon>
         <ListItemText primary="Finante" />
       </ListItem>)}
-
        {user.elev && (<ListItem button className="drawer-item" onClick={() => navigate('/abonamente')}>
         <ListItemIcon className="drawer-icon"><MonetizationOn /></ListItemIcon>
-        <ListItemText primary="Abonamente" />
+        <ListItemText primary="Pachete" />
       </ListItem>)}
-
-      <ListItem button className="drawer-item" onClick={() => navigate('/setari')}>
+      <ListItem button className="drawer-item" onClick={() => navigate('/profil')}>
         <ListItemIcon className="drawer-icon"><Settings /></ListItemIcon>
         <ListItemText primary="Setări cont" />
       </ListItem>
-
-      {/* Spacer + Logout */}
       <Box sx={{ flexGrow: 1 }} />
       <Divider className="drawer-divider" />
       <ListItem button className="drawer-item" onClick={handleLogout}>

@@ -300,10 +300,10 @@ export default function CursProfesorPagina({ user }) {
                         </button>
 
                         {m.completat == 1 ? (
-                          <span style={{ backgroundColor: "rgb(46, 170, 40)" }}>
-                            <FaCheck style={{ marginRight: 6 }} />
-                            Completat
-                          </span>
+                              <span className="badge-completat">
+                                <FaCheck style={{ marginRight: 6 }} />
+                                Completat
+                              </span>
                         ) : (
                           <button
                             className="btn"
@@ -477,67 +477,56 @@ export default function CursProfesorPagina({ user }) {
           </ul>
         )}
 
-        {tab === "parcursulMeu" && (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "2rem" }}
-          >
-            <div style={{ display: "flex" }}>
-              <div>Progres general : </div>
-              <div
-                style={{
-                  width: "100%",
-                  backgroundColor: "rgb(177, 177, 177)",
-                  padding: "1px",
-                  borderRadius: "1rem",
-                }}
-              >
-                <div
-                  style={{
-                    height: "100%",
-                    width: `${progres?.procent || 0}%`,
-                    backgroundColor: "rgb(63, 169, 255)",
-                    padding: "1px",
-                    borderRadius: "1rem",
-                  }}
-                ></div>
-                <span
-                  style={{
-                    position: "relative",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    top: "-75%",
-                    color: "white",
-                  }}
-                >{`${Math.round(progres?.procent || 0)}%`}</span>
-              </div>
-            </div>
-            <div>Media notelor : {progres?.medie || ""}</div>
-             <div>
-              <div className="chart-wrapper animated-chart">
-                <ResponsiveContainer width="100%" height={260}>
-                  <LineChart
-                    data={progres?.note||{}}
-                    // data={dateTabel}
+    {tab === "parcursulMeu" && (
+  <div className="parcurs-wrapper">
+    {/* CARD - Progres și Media */}
+    <div className="card-progres-media">
+      <div className="progres-label">Progres general</div>
+      <div className="progres-bar-outer">
+        <div
+          className="progres-bar-inner"
+          style={{ width: `${progres?.procent || 0}%` }}
+        ></div>
+        <span className="progres-bar-text">
+          {`${Math.round(progres?.procent || 0)}%`}
+        </span>
+      </div>
+      <div className="media-note">Media notelor: {progres?.medie || "N/A"}</div>
+    </div>
 
-                    margin={{ top: 20, right: 20, left: 40, bottom: 20 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="titlu"
-                    />
-                    <YAxis domain={[1, 10]}/>
-                    <Legend/>
-                    <Tooltip formatter={(valoare) => [`${valoare}`, "Număr"]} />
-                    <Line type="monotone" dataKey="nota" stroke="#8884d8" />
-
-                    
-      
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        )}
+    {/* CARD - Grafic Note */}
+    <div className="card-grafic">
+      <h3 style={{ marginBottom: 16, color: "#2f5972" }}>Evoluția Notelor</h3>
+      <ResponsiveContainer width="100%" height={360}>
+        <LineChart
+          data={progres?.note || []}
+          margin={{ top: 20, right: 40, left: 0, bottom: 60 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+            dataKey="titlu"
+            tickFormatter={(value) =>
+              value.length > 15 ? value.slice(0, 15) + "…" : value
+          }
+          interval={0}
+  height={80}
+  minTickGap={20}
+  padding={{ left: 20, right: 20 }}
+          />
+            <YAxis
+              domain={[1, 10]}
+               padding={{ top: 20, bottom: 10 }}
+            />
+          <Tooltip formatter={(valoare) => [`${valoare}`, "Notă"]} />
+          <Legend />
+          <Line type="monotone" dataKey="nota" stroke="#8884d8">
+            <LabelList dataKey="nota" position="top" />
+          </Line>
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+)}
       </div>
 
       {selectedImage && (

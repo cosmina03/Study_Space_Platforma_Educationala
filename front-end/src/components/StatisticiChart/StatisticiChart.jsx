@@ -48,14 +48,13 @@ const StatisticiChart = ({ stat }) => {
           />
           <Tooltip formatter={(valoare) => [`${valoare}`, 'Număr']} />
 
-          {/* Bar cu proprietăți de animație */}
           <Bar
             dataKey="valoare"
             fill="#2f5972"
             barSize={20}
-            animationBegin={300}       // delay înainte de start (ms)
-            animationDuration={1200}   // durata animației (ms)
-            animationEasing="ease-out" // tip easing
+            animationBegin={300}      
+            animationDuration={1200}   
+            animationEasing="ease-out"
           >
             <LabelList dataKey="valoare" position="right" />
           </Bar>

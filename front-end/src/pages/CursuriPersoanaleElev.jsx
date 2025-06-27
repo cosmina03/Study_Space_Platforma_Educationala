@@ -102,13 +102,6 @@ const CursuriPersonaleElev = ({user}) => {
                 {user?.elev && (
                   <div className="course-actions">
                     <button className="btn-buy" onClick={()=>vizualizareCurs(curs.id, curs.tilu)}>Vizualizeaza</button>
-                    {/* <button
-                      className="btn-favorite"
-                      onClick={() => toggleFavorite(curs.id)}
-                      title="Adaugă la favorite"
-                    >
-                      {favorited.includes(curs.id) ? "❤️" : "♡"}
-                    </button> */}
                   </div>
                 )}
                 {user?.elev == false && <button onClick={()=>vizualizareCurs(curs.id, curs.titlu)}>Vizualizeaza</button>}

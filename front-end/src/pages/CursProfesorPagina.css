@@ -306,4 +306,89 @@
   color: white;
 }
 
-/* Păstrează și restul stilurilor deja existente */
+
+.badge-completat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #2faa28;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease;
+}
+
+.badge-completat:hover {
+  background-color: #248e21;
+}
+
+/* Stil pentru secțiunea Parcursul Meu */
+.parcurs-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 30px;
+  align-items: center; /* Centrare pe orizontală */
+}
+
+/* Card Progres - centrat */
+.card-progres-media {
+  background-color: #ffffff;
+  padding: 24px 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  font-size: 16px;
+  color: #2f5972;
+  width: 100%;
+  max-width: 600px;
+  text-align: left;
+}
+
+.progres-label {
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.progres-bar-outer {
+  background-color: #d7eaf8;
+  border-radius: 20px;
+  height: 26px;
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.progres-bar-inner {
+  height: 100%;
+  background-color: #3fa9ff;
+  border-radius: 20px;
+  transition: width 0.4s ease-in-out;
+}
+
+.progres-bar-text {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+  transform: translateY(-50%);
+}
+
+.media-note {
+  font-size: 17px;
+  font-weight: 500;
+  color: #234254;
+}
+
+.card-grafic {
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+  width: 90%;
+  max-width: 1000px;
+}

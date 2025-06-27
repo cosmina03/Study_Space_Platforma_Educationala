@@ -344,13 +344,13 @@ app.get("/cursuri/:tip", verifyTokenMiddleware, async (req, res) => {
       //proprii
       if (elev) {
         cursuri = await db.all(`
-            SELECT c.*, p.nume, r.rating rating
-            FROM cursuri c
-            JOIN profesori p, participanti pa
-            ON c.email_profesor = p.email
-            AND pa.id_curs = c.id
-            LEFT JOIN rating r ON r.id_curs = c.id
-            `);
+          SELECT c.*, p.nume, r.rating
+          FROM cursuri c
+          JOIN participanti pa ON pa.id_curs = c.id
+          JOIN profesori p ON c.email_profesor = p.email
+          LEFT JOIN rating r ON r.id_curs = c.id AND r.email_elev = ?
+          WHERE pa.email_participant = ?
+            `, email, email);
       } else {
         cursuri = await db.all(
           `
