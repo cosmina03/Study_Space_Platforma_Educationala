@@ -192,3 +192,99 @@ FROM participanti p
   JOIN cursuri c ON c.id = p.id_curs
   WHERE c.email_profesor = 'cosmina@gmail.com'
 
+  SELECT c.*, p.nume, r.rating rating
+            FROM cursuri c
+            JOIN profesori p, participanti pa
+            ON c.email_profesor = p.email
+            AND pa.id_curs = c.id
+            LEFT JOIN rating r ON r.id_curs = c.id
+
+SELECT c.*, p.nume, r.rating
+  FROM cursuri c
+  JOIN participanti pa ON pa.id_curs = c.id
+  JOIN profesori p ON c.email_profesor = p.email
+  LEFT JOIN rating r ON r.id_curs = c.id AND r.email_elev = 'test10'
+  WHERE pa.email_participant = 'test10'
+
+  SELECT r.*, r.id id_rasp, c.*, t.*, e.nume FROM raspuns_tema r
+        JOIN teme t ON t.id = r.id_tema
+        JOIN cursuri c ON c.id = t.id_curs
+        JOIN elevi e ON e.email = r.email_participant
+        WHERE c.email_profesor = 'cosmina@gmail.com'
+        AND r.id NOT IN ( SELECT id_rasp FROM feedback)
+
+
+SELECT email_elev, total_materiale, total_completate, ((total_completate+0.0)/(total_materiale+0.0))*100 procent FROM (
+(SELECT count(*) total_materiale FROM materiale
+WHERE id_curs = 17),
+(SELECT p.email_elev, count(*) total_completate 
+FROM materiale m
+JOIN progres_materiale p ON m.id = p.id_mat
+JOIN elevi e on e.email = p.email_elev
+WHERE id_curs = 17 
+GROUP BY email_elev)
+)
+
+
+alter table profesori
+add column cale_poza text default null
+
+
+SELECT titlu FROM cursuri c
+JOIN participanti p ON c.id = p.id_curs
+WHERE p.email_participant = 'cosmina@gmail.com'
+
+alter table rating
+add column feedback_scris text
+
+13,test10,4,
+14,test10,5,
+18,test10,5,
+17,cosminadinita22@gmail.com,5,
+17,test10,3,
+
+.schema rating
+drop table rating
+
+CREATE TABLE rating(
+        id_curs integer ,
+        email_elev text ,
+        rating tinyint , feedback_scris text ,
+        primary key(id_curs, email_elev)
+);
+
+
+SELECT json_group_array(r.feedback_scris  )
+, c.titlu, f.id favorit, c.id, p.nume, c.cale_poza, c.cost,
+          (SELECT AVG(rating)
+          FROM rating r
+          WHERE r.id_curs = c.id) rating
+            FROM cursuri c
+            JOIN profesori p
+            ON c.email_profesor = p.email
+            LEFT JOIN favorite f ON f.id_curs = c.id
+            LEFT JOIN rating r on r.id_curs = c.id
+            group by titlu, favorit, c.id, nume, c.cale_poza,c.cost
+
+
+             
+
+SELECT c.titlu, f.id favorit, 
+          (SELECT AVG(rating)
+          FROM rating r
+          WHERE r.id_curs = c.id) rating
+            FROM cursuri c
+            JOIN profesori p
+            ON c.email_profesor = p.email
+            LEFT JOIN favorite f ON f.id_curs = c.id
+
+
+SELECT json_group_array(r.feedback_scris) lista_feedback, c.*, p.nume, f.id favorit, 
+          (SELECT AVG(rating)
+          FROM rating r
+          WHERE r.id_curs = c.id) rating
+            FROM cursuri c
+            JOIN profesori p
+            ON c.email_profesor = p.email
+            LEFT JOIN favorite f ON f.id_curs = c.id
+            LEFT JOIN rating r on c.id = r.id_curs

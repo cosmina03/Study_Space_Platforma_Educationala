@@ -123,7 +123,7 @@ app.post("/creare-cont", async (req, res) => {
         return res.status(200).json({
           success: true,
           jwt: token,
-          userData: { elev, nume, credite: 0 },
+          userData: { elev, nume, credite: 0, email },
         });
       }
     );
@@ -178,7 +178,7 @@ app.post("/autentificare", async (req, res) => {
         return res.status(200).json({
           success: true,
           jwt: token,
-          userData: { elev, nume: cont.nume, credite: cont.credite },
+          userData: { elev, nume: cont.nume, credite: cont.credite, email, calePoza: cont.cale_poza },
         });
       }
     );
@@ -321,7 +321,8 @@ app.get("/cursuri/:tip", verifyTokenMiddleware, async (req, res) => {
     if (tip == "toate") {
       if (elev) {
         cursuri = await db.all(`
-          SELECT c.*, p.nume, f.id favorit, 
+          SELECT json_group_array(r.feedback_scris  ) lista_feedback
+        , c.titlu, f.id favorit, c.id, p.nume, c.cale_poza, c.cost,
           (SELECT AVG(rating)
           FROM rating r
           WHERE r.id_curs = c.id) rating
@@ -329,6 +330,9 @@ app.get("/cursuri/:tip", verifyTokenMiddleware, async (req, res) => {
             JOIN profesori p
             ON c.email_profesor = p.email
             LEFT JOIN favorite f ON f.id_curs = c.id
+            LEFT JOIN rating r on r.id_curs = c.id
+            group by titlu, favorit, c.id, nume, c.cale_poza,c.cost
+
             `);
       } else {
         cursuri = await db.all(
@@ -1085,17 +1089,18 @@ app.get("/favorite", verifyTokenMiddleware , async (req, res) => {
 });
 
 
-app.post("/rating/:idCurs/:rating", verifyTokenMiddleware , async (req, res) => {
+app.post("/rating/:idCurs", verifyTokenMiddleware , async (req, res) => {
   try {
-    const {idCurs, rating} = req.params
+    const {idCurs} = req.params
+    const {rating, feedbackScris} = req.body
     const { sub: email, elev } = req.decoded;
 
     await db.run(`
-      INSERT INTO rating (id_curs, email_elev, rating)
-      VALUES (?, ?, ?)
+      INSERT INTO rating (id_curs, email_elev, rating, feedback_scris)
+      VALUES (?, ?, ?, ?)
       ON CONFLICT(id_curs, email_elev) DO UPDATE
-      SET rating = excluded.rating
-      `,idCurs, email, +rating)
+      SET rating = excluded.rating, feedback_scris = excluded.feedback_scris
+      `,idCurs, email, +rating, feedbackScris)
 
     return res.status(201).json('Succes!');
   } catch (error) {
@@ -1104,6 +1109,144 @@ app.post("/rating/:idCurs/:rating", verifyTokenMiddleware , async (req, res) => 
   }
 });
 
+app.get("/studenti/:idCurs", verifyTokenMiddleware , async (req, res) => {
+  try {
+    const {idCurs} = req.params
+    const { sub: email, elev } = req.decoded;
+
+    const studenti = await db.all(`
+      SELECT email_elev, nume, total_materiale, total_completate, ((total_completate+0.0)/(total_materiale+0.0))*100 procent FROM (
+      (SELECT count(*) total_materiale FROM materiale
+      WHERE id_curs = ?),
+      (SELECT p.email_elev, e.nume, count(*) total_completate 
+      FROM materiale m
+      JOIN progres_materiale p ON m.id = p.id_mat
+      JOIN elevi e on e.email = p.email_elev
+      WHERE id_curs = ?
+      GROUP BY email_elev)
+      )`,idCurs, idCurs)
+
+    return res.status(201).json(studenti);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Eroare de server");
+  }
+});
+
+app.put("/schimbare/nume", verifyTokenMiddleware , async (req, res) => {
+  try {
+    const {nume} = req.body
+    const { sub: email, elev } = req.decoded;
+
+    const resultat = await db.run(`
+      UPDATE elevi
+      SET nume = ?
+      WHERE email = ?
+      `, nume, email)
+
+    return res.status(201).json('Succes!');
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Eroare de server");
+  }
+});
+
+app.put("/schimbare/poza", verifyTokenMiddleware, upload.single("poza_profil"), async (req, res) => {
+    try {
+      const { sub: email, elev } = req.decoded;
+      const file = req?.file;
+      if (!file) {
+        return res.status(400).json("Adaugati o poza!");
+      }
+      const fileBuffer = file.buffer;
+
+      const resized = await sharp(fileBuffer)
+        .resize({
+          width: 400,
+          height: 160,
+          fit: "cover",
+        })
+        .toBuffer();
+
+      const uuid = v4();
+      const calePoza = path.join(__dirname, "poze_profil", `${uuid}.jpg`);
+
+      const caleVeche = await db.get(`
+        SELECT cale_poza FROM elevi
+        WHERE email = ?
+        UNION ALL
+        SELECT cale_poza FROM profesori
+        WHERE email = ?
+        `, email, email)
+
+        try {
+          fs.unlinkSync(path.join(__dirname, "poze_profil", `${caleVeche.cale_poza}.jpg`))
+        } catch (error) {
+          console.log(error.message)
+        }
+      fs.writeFileSync(calePoza, resized);
+
+      if(elev){
+       await db.run(
+                `
+                UPDATE elevi
+                SET cale_poza = ?
+                WHERE email = ?
+                `, uuid, email
+              );
+      }else{
+        db.run(
+        `
+        UPDATE profesori
+        SET cale_poza = ?
+        WHERE email = ?
+        `, uuid, email
+      );
+      }
+
+      return res.status(200).json({uuid});
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json("Poza nu a putut fi schimbata!");
+    }
+  }
+);
+
+app.get("/poza/profil/:cale", async (req, res) => {
+  try {
+    const { cale } = req.params;
+    if (!cale) {
+      return res.status(400).json("Adaugati id-ul pozei");
+    }
+    const caleServer = path.join(__dirname, "poze_profil", `${cale}.jpg`);
+    // console.log(caleServer)
+    const stream = fs.createReadStream(caleServer.toString());
+    res.setHeader("Content-Type", "image/jpeg");
+    stream.on("error", () => {
+      return res.status(500).json("Eroare in preluarea pozei");
+    });
+    stream.pipe(res);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json("Eroare in preluarea pozei");
+  }
+});
+
+app.get("/recente/cursuri", verifyTokenMiddleware, async (req, res) => {
+  try {
+    const { sub: email, elev } = req.decoded;
+    const cursuri = await db.all(`
+      SELECT id, titlu FROM cursuri c
+      JOIN participanti p ON c.id = p.id_curs
+      WHERE p.email_participant = ?
+      `, email)
+
+    return res.status(200).json({cursuri});
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Eroare de server");
+  }
+});
 
 app.listen(PORT, async () => {
   const pornitDb = await startDB();
