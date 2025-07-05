@@ -151,6 +151,8 @@ const Cursuri = ({ user, refreshHeader }) => {
     });
   }, [search]);
 
+  const [afisare, setAfisare] = useState(false)
+
   return (
     <div className="courses-page">
       {user?.elev == true && (
@@ -185,6 +187,13 @@ const Cursuri = ({ user, refreshHeader }) => {
           <div className="course-rating">
             <img src={filledStar} alt="rating" />
             <span>{(+curs.rating).toFixed(1)}</span>
+            {!afisare && <button onClick={()=>setAfisare(curs.id)}>Afisare feedback</button>}
+            {afisare == curs.id && <div>
+              <button onClick={()=>setAfisare(false)}>Ascunde feedback</button>
+                 {JSON.parse(curs?.lista_feedback || '[]')?.filter(fb => !!fb)?.map(fb=>{
+                  return (<div>{fb}</div>)
+                })}
+              </div>}
           </div>
         )}
         

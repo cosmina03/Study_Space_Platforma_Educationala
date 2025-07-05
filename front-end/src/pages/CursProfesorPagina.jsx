@@ -21,6 +21,7 @@ import {
   Legend,
   Line,
 } from "recharts";
+import { Button } from "@mui/material";
 
 
 export default function CursProfesorPagina({ user }) {
@@ -40,6 +41,7 @@ export default function CursProfesorPagina({ user }) {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const [progres, setProgres] = useState({});
+  const [studenti, setStudenti] = useState([])
 
   const fetchMateriale = async () => {
     try {
@@ -105,10 +107,35 @@ export default function CursProfesorPagina({ user }) {
     }
   };
 
+  
+  const fetchStudenti = async () => {
+    try {
+      const response = await fetch(API_URL + `/studenti/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authentication: localStorage.getItem("jwt") || "",
+        },
+      });
+      const data = await response.json();
+      console.log(progres);
+      if (response.ok) {
+        setStudenti(data);
+      } else {
+        setErrorMessage(data.message || "Eroare in preluarea temelor");
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Eroare in preluarea temelor");
+    }
+  };
+
+
   useEffect(() => {
     fetchMateriale();
     fetchTeme();
     fetchProgres();
+    fetchStudenti()
   }, []);
 
   const handleCreateMaterial = () => navigate(`/curs/${id}/creare-material`);
@@ -235,6 +262,14 @@ export default function CursProfesorPagina({ user }) {
               Parcursul-Meu
             </span>
           )}
+          {user?.elev && progres?.procent >= 50 && (
+          <Button
+            className="btn-feedback-inline"
+            onClick={() => navigate(`/feedback/${id}`)}
+          >
+            Lasă un feedback cursului
+          </Button>
+        )}
         </div>
         {!user.elev && (
           <div className="buton-plus-wrapper">
@@ -471,8 +506,11 @@ export default function CursProfesorPagina({ user }) {
 
         {tab === "studenti" && (
           <ul>
-            {curs.studenti?.map((s, idx) => (
-              <li key={idx}>{s}</li>
+            {studenti?.map((s, idx) => (
+              <li key={idx}>
+                <div>{s.nume} - {s.procent}%</div>
+                
+              </li>
             ))}
           </ul>
         )}

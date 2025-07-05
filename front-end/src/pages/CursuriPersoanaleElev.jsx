@@ -40,24 +40,28 @@ const CursuriPersonaleElev = ({user}) => {
   }, []);
 
   const vizualizareCurs = (id, nume) => {
+    //TODO remove
+    toggleOverlay()
+    return
     navigate(`/curs/${id}`, {state: {nume}})
   }
 
-  const handleStarClick = async (newRating, idCurs) => {
-        try {
-      const response = await fetch(API_URL + `/rating/${idCurs}/${newRating}`, {
+  const sendRating = async (feedbackInclus = false) => {
+     try {
+      const response = await fetch(API_URL + `/rating/${payload.idCurs}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authentication: localStorage.getItem("jwt") || "",
-        },
+        },body:JSON.stringify({rating: payload.newRating, feedbackScris : feedbackInclus ? feedbackScris: null})
       });
 
+      toggleOverlay()
       if (response.ok) {
         setCursuri(prev=>{
           const newCursuri = [...prev]
-          const curs = newCursuri.find(curs=>curs.id === idCurs)
-          curs.rating = newRating
+          const curs = newCursuri.find(curs=>curs.id === payload.idCurs)
+          curs.rating = payload.newRating
           return newCursuri
         })
       } 
@@ -66,9 +70,39 @@ const CursuriPersonaleElev = ({user}) => {
     }
   }
 
+
+  const handleStarClick = async (newRating, idCurs) => {
+      setPayload({newRating, idCurs})
+      toggleOverlay()
+  }
+
+  const [payload, setPayload] = useState({})
+  const [overlay, setOverlay] = useState(false)
+  const [feedbackScris, setFeedbackScris] = useState('')
+  const toggleOverlay = () => {
+    setOverlay(prev=>!prev)
+  }
+
+  const closeOverlay = (e) => {
+    if(e.target == e.currentTarget){
+      toggleOverlay()
+    }
+  }
+
       return (
         <div className="courses-page">
     
+          {overlay && <div className="popup-feedback-overlay" onClick={closeOverlay}>
+            <div className="popup-feedback">
+              <div>Doresti sa adaugi si un mesaj?</div>
+              <input type="text" value={feedbackScris} onChange={(e)=>setFeedbackScris(e.target.value)}/>
+              <button onClick={()=>sendRating(true)}>Trimitere</button>
+              <br/>
+              <button onClick={()=>sendRating(false)}>Trimitere fara</button>
+            </div>
+            
+          </div>}
+
           <div className="courses-grid">
             {!!errorMessage && <div>{errorMessage}</div>}
 

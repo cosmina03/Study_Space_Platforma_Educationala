@@ -95,7 +95,7 @@ import { API_URL } from "../constants.js";
 const TemeProfesor = ({ user }) => {
   const navigate = useNavigate();
   const [teme, setTeme] = useState([]);
-  const [cursuri, setCursuri] = useState({});
+  const [temeMap, setTemeMap] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
 
   const fetchTeme = async () => {
@@ -116,11 +116,11 @@ const TemeProfesor = ({ user }) => {
         // Construim un obiect { [id_curs]: titlu_curs }
         const cursuriMap = {};
         data.teme.forEach((tema) => {
-          if (!cursuriMap[tema.id_curs]) {
-            cursuriMap[tema.id_curs] = tema.titlu;
+          if (!cursuriMap[tema.id_tema]) {
+            cursuriMap[tema.id_tema] = tema.titlu;
           }
         });
-        setCursuri(cursuriMap);
+        setTemeMap(cursuriMap);
       } else {
         setErrorMessage(data.message || "Eroare la preluarea temelor.");
       }
@@ -147,10 +147,10 @@ const TemeProfesor = ({ user }) => {
   // Grupăm temele după id_curs
   const temeGrupate = {};
   teme.forEach((tema) => {
-    if (!temeGrupate[tema.id_curs]) {
-      temeGrupate[tema.id_curs] = [];
+    if (!temeGrupate[tema.id_tema]) {
+      temeGrupate[tema.id_tema] = [];
     }
-    temeGrupate[tema.id_curs].push(tema);
+    temeGrupate[tema.id_tema].push(tema);
   });
 
   return (
@@ -159,17 +159,17 @@ const TemeProfesor = ({ user }) => {
 
       {errorMessage && <div className="error-message">{errorMessage}</div>}
 
-      {!Object.keys(cursuri).length && !errorMessage && (
+      {!Object.keys(temeMap).length && !errorMessage && (
         <div className="no-teme">Momentan nu există teme neevaluate.</div>
       )}
 
       <div className="cursuri-container">
-        {Object.entries(cursuri).map(([idCurs, titluCurs]) => (
-          <div className="curs-card" key={idCurs}>
-            <h2 className="curs-title">{titluCurs}</h2>
+        {Object.entries(temeMap).map(([idTema, titluTema]) => (
+          <div className="curs-card" key={idTema}>
+            <h2 className="curs-title">{titluTema}</h2>
 
             <div className="teme-list">
-              {temeGrupate[idCurs]?.map((tema) => (
+              {temeGrupate[idTema]?.map((tema) => (
                 <div className="tema-item" key={tema.id_rasp}>
                   <div className="tema-elev">Elev: <strong>{tema.nume}</strong></div>
                   <div className="tema-actions">

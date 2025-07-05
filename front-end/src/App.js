@@ -57,7 +57,7 @@ function App() {
 
           <Route path="/abonamente" element={<Abonamente user={user}/>} />
           <Route path="/plata" element={<ProcesarePlata user={user}/>} />
-          <Route path="/profil" element={<ProfilElev/>}/>
+          <Route path="/profil" element={<ProfilElev user={user} refreshHeader={refreshHeader}/>}/>
           <Route path="/cursuri-personale" element={<CursuriPersonaleElev user={user}/>}/>
           <Route path="/finante" element={<PaginaFinante />} />
           <Route path="/teme" element={<TemeProfesor user={user}/>} />

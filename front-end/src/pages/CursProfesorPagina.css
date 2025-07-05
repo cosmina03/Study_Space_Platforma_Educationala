@@ -392,3 +392,17 @@
   width: 90%;
   max-width: 1000px;
 }
+.btn-feedback-inline {
+  margin-left: 20px;
+  height: 36px;
+  background-color: #2f5972;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-feedback-inline:hover {
+  background-color: #3e6b88;
+}
