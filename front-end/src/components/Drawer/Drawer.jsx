@@ -23,22 +23,12 @@ import {
 } from '@mui/icons-material';
 
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from "../../constants.js";
 
-export default function StudySpaceDrawer({refreshHeader}) {
+export default function StudySpaceDrawer({user, refreshHeader}) {
   const [state, setState] = useState({ left: false });
-  const [user, setUser] = useState(null);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const userDataString = localStorage.getItem("userData");
-    if (userDataString) {
-      try {
-        setUser(JSON.parse(userDataString));
-      } catch (error) {
-        console.error("Eroare la parsarea userData:", error);
-      }
-    }
-  }, []);
+  const navigate = useNavigate();
 
   const isLoggedIn = !!user;
   if (!isLoggedIn) return null;
@@ -58,10 +48,17 @@ export default function StudySpaceDrawer({refreshHeader}) {
     <List className="drawer-list">
       <ListItem className="drawer-item" style={{ cursor: 'default' }}>
         <ListItemIcon>
-          <Avatar sx={{ bgcolor: "#9ccddc", color: "#062c43" }}>
-            {user?.nume?.charAt(0).toUpperCase() || 'U'}
-          </Avatar>
-        </ListItemIcon>
+          {user?.calePoza ? (
+            <Avatar
+              src={`${API_URL}/poza/profil/${user.calePoza}`}
+              sx={{ width: 48, height: 48 }}
+            />
+          ) : (
+            <Avatar sx={{ bgcolor: "#9ccddc", color: "#062c43" }}>
+              {user?.nume?.charAt(0).toUpperCase() || 'U'}
+            </Avatar>
+          )}
+</ListItemIcon>
         <ListItemText
           primary={user?.nume || 'Utilizator'}
           secondary={user?.elev ? "Elev" : "Profesor"}

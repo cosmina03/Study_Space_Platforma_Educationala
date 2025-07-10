@@ -70,8 +70,8 @@ const PaginaFinante = () => {
             {finante?.topCursuri?.map((c, idx) => (
               <tr key={idx}>
                 <td>{c.titlu}</td>
-                <td>{c.venit}</td>
                 <td>{c.elevi}</td>
+                <td>{c.venit}</td>
               </tr>
             ))}
           </tbody>

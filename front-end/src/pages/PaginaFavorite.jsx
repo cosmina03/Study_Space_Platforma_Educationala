@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { API_URL } from "../constants.js";
 import { useNavigate } from "react-router-dom";
 import "./PaginaFavorite.css";
+
 const PaginaFavorite = ({user, refreshHeader}) => {
     
     const navigate = useNavigate()

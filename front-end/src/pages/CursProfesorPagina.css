@@ -406,3 +406,38 @@
 .btn-feedback-inline:hover {
   background-color: #3e6b88;
 }
+
+.lista-studenti {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.student-linie {
+  display: flex;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border-radius: 10px;
+  width: 60%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  font-size: 16px;
+  font-weight: 500;
+  color: #2a445e;
+  transition: background 0.2s ease;
+}
+
+.student-linie:hover {
+  background-color: #f0f8ff;
+}
+
+.student-nume {
+  text-align: left;
+}
+
+.student-procent {
+  font-weight: bold;
+  color: #3fa9ff;
+}

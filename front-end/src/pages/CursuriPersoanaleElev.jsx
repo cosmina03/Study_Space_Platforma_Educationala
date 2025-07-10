@@ -41,8 +41,7 @@ const CursuriPersonaleElev = ({user}) => {
 
   const vizualizareCurs = (id, nume) => {
     //TODO remove
-    toggleOverlay()
-    return
+    //toggleOverlay()
     navigate(`/curs/${id}`, {state: {nume}})
   }
 
@@ -92,16 +91,26 @@ const CursuriPersonaleElev = ({user}) => {
       return (
         <div className="courses-page">
     
-          {overlay && <div className="popup-feedback-overlay" onClick={closeOverlay}>
-            <div className="popup-feedback">
-              <div>Doresti sa adaugi si un mesaj?</div>
-              <input type="text" value={feedbackScris} onChange={(e)=>setFeedbackScris(e.target.value)}/>
-              <button onClick={()=>sendRating(true)}>Trimitere</button>
-              <br/>
-              <button onClick={()=>sendRating(false)}>Trimitere fara</button>
+         {overlay && (
+            <div className="popup-feedback-overlay" onClick={closeOverlay}>
+              <div className="popup-feedback-card">
+                <h3>Vrei să adaugi și un mesaj?</h3>
+                <textarea
+                  value={feedbackScris}
+                  onChange={(e) => setFeedbackScris(e.target.value)}
+                  placeholder="Scrie un feedback opțional..."
+                />
+                <div className="popup-feedback-buttons">
+                  <button className="btn-submit" onClick={() => sendRating(true)}>
+                    Trimite cu mesaj
+                  </button>
+                  <button className="btn-skip" onClick={() => sendRating(false)}>
+                    Trimite fără mesaj
+                  </button>
+                </div>
+              </div>
             </div>
-            
-          </div>}
+          )}
 
           <div className="courses-grid">
             {!!errorMessage && <div>{errorMessage}</div>}

@@ -20,9 +20,11 @@ from '@mui/icons-material/LibraryBooks';
 import logo from '../../assets/logo.png';
 import Drawer from '../Drawer/Drawer';
 import coin from "../../assets/coin.svg";
+import { useUser } from "../UserContext/UserContext.js";
 
-export default function Header({ user, refreshHeader }) {
+export default function Header({  refreshHeader }) {
   const navigate = useNavigate();
+  const { user } = useUser();
   const isLoggedIn = Object.keys(user)!=0;
   const path = window.location.pathname
   console.log(path)

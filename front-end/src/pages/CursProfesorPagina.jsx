@@ -24,7 +24,7 @@ import {
 import { Button } from "@mui/material";
 
 
-export default function CursProfesorPagina({ user }) {
+export default function CursProfesorPagina({ user, refreshHeader  }) {
   const { id } = useParams();
   const location = useLocation();
   const nume = location?.state?.nume || "";
@@ -109,16 +109,17 @@ export default function CursProfesorPagina({ user }) {
 
   
   const fetchStudenti = async () => {
+    console.log("ID curs:", id);
     try {
       const response = await fetch(API_URL + `/studenti/${id}`, {
-        method: "GET",
+         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authentication: localStorage.getItem("jwt") || "",
+         Authentication: localStorage.getItem("jwt") || "",
         },
       });
       const data = await response.json();
-      console.log(progres);
+       console.log(data);
       if (response.ok) {
         setStudenti(data);
       } else {
@@ -212,12 +213,15 @@ export default function CursProfesorPagina({ user }) {
         const selectedMat = newMat.find((m) => m.id == material.id);
         if (selectedMat) {
           selectedMat.completat = 1;
+          
         }
         return newMat;
       });
+        await fetchProgres();
     } catch (error) {
       alert(error.message || "Eroare transmitere progres");
     }
+   
   };
 
   return (
@@ -504,16 +508,17 @@ export default function CursProfesorPagina({ user }) {
           </div>
         )}
 
-        {tab === "studenti" && (
-          <ul>
-            {studenti?.map((s, idx) => (
-              <li key={idx}>
-                <div>{s.nume} - {s.procent}%</div>
-                
-              </li>
-            ))}
-          </ul>
-        )}
+{tab === "studenti" && (
+  <div className="lista-studenti">
+    {studenti?.map((s, idx) => (
+      <div key={idx} className="student-linie">
+        <div className="student-nume">{s.nume}</div>
+        <div className="student-procent">{s.procent}%</div>
+      </div>
+    ))}
+  </div>
+)}
+
 
     {tab === "parcursulMeu" && (
   <div className="parcurs-wrapper">
@@ -546,10 +551,10 @@ export default function CursProfesorPagina({ user }) {
             tickFormatter={(value) =>
               value.length > 15 ? value.slice(0, 15) + "…" : value
           }
-          interval={0}
-  height={80}
-  minTickGap={20}
-  padding={{ left: 20, right: 20 }}
+            interval={0}
+            height={80}
+            minTickGap={20}
+            padding={{ left: 20, right: 20 }}
           />
             <YAxis
               domain={[1, 10]}

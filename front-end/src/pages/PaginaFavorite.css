@@ -1,9 +1,3 @@
-.courses-page {
-  padding: 60px 30px;
-  max-width: 1200px;
-  margin: auto;
-  text-align: center;
-}
 
 .courses-title {
   font-size: 36px;
@@ -33,6 +27,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 25px;
+  padding: 40px 60px; /* 👉 spațiu față de marginile laterale */
+  box-sizing: border-box;
+}
+
+.courses-page {
+  padding: 60px 30px;
+  max-width: 1400px;
+  margin: 0 auto; /* 👉 centru pe ecran */
 }
 
 .course-card {
@@ -122,4 +124,18 @@
 .btn-favorite:hover {
   background-color: #2f5972;
   color: white;
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.course-card {
+  animation: fadeInUp 0.4s ease-in-out;
 }

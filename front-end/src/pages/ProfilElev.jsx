@@ -83,6 +83,7 @@ const ProfilElev = ({ user, refreshHeader }) => {
   const handleChange = (e) => {
     // setFile(e.target.files[0])
     handleSubmit(e.target.files[0]);
+
   };
 
   const [cursuri, setCursuri] = useState([]);
@@ -125,7 +126,7 @@ const ProfilElev = ({ user, refreshHeader }) => {
           <img
             src={API_URL + "/poza/profil/" + user.calePoza}
             alt={"Poza profil"}
-            className="course-image"
+             className="avatar-profil"
           />
         ) : (
           <img
@@ -182,9 +183,10 @@ const ProfilElev = ({ user, refreshHeader }) => {
             <div>
             {cursuri.map( (curs, idCurs)=>{
               return <div key={idCurs}>
-                <div onClick={()=>navigateToCourse(curs.id, curs.titlu)}>{curs?.titlu}</div>
-              </div>
-            }) }
+                <div onClick={() => navigateToCourse(curs.id, curs.titlu)}>
+                ➤ {curs?.titlu}
+              </div></div>
+                          }) }
             </div>
           : <p className="fara-cursuri">Nu ai încă cursuri achiziționate.</p>}
         </div>

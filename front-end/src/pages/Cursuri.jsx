@@ -4,40 +4,64 @@ import { useNavigate } from "react-router-dom";
 import { API_URL } from "../constants.js";
 import filledStar from "../assets/filled-star.svg";
 import coin from "../assets/coin.svg";
+import { useUser } from "../components/UserContext/UserContext.js"; 
 const SURSA_POZA = "http://localhost:8080/poza";
 
-const Cursuri = ({ user, refreshHeader }) => {
+
+const Cursuri = ({ refreshHeader }) => {
   const navigate = useNavigate();
   const [cursuri, setCursuri] = useState([]);
   const [cursuriFiltrate, setCursuriFiltrate] = useState([]);
   const [search, setSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [favorited, setFavorited] = useState([]);
+  const { user, setUser } = useUser();
+const [expandedId, setExpandedId] = useState(null);
 
-  const fetchCursuri = async () => {
-    try {
-      const response = await fetch(API_URL + "/cursuri/toate", {
+const toggleDescriere = (id) => {
+  setExpandedId((prev) => (prev === id ? null : id));
+};
+
+const fetchCursuri = async () => {
+  try {
+    const [toateRes, propriiRes] = await Promise.all([
+      fetch(API_URL + "/cursuri/toate", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authentication: localStorage.getItem("jwt") || "",
         },
-      });
+      }),
+      fetch(API_URL + "/cursuri/proprii", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authentication: localStorage.getItem("jwt") || "",
+        },
+      }),
+    ]);
 
-      const data = await response.json();
+    const toateData = await toateRes.json();
+    const propriiData = await propriiRes.json();
 
-      if (response.ok) {
-        setCursuri(data.cursuri);
-        setCursuriFiltrate(data.cursuri);
-      } else {
-        setErrorMessage(data.message || "Eroare in preluarea cursurilor");
-      }
-    } catch (error) {
-      console.error(error);
-      setErrorMessage("Eroare in preluarea cursurilor");
+    if (toateRes.ok && propriiRes.ok) {
+      const cumparate = propriiData.cursuri.map((c) => c.id);
+
+      const marcate = toateData.cursuri.map((c) => ({
+        ...c,
+        dejaCumparat: cumparate.includes(c.id),
+      }));
+
+      setCursuri(marcate);
+      setCursuriFiltrate(marcate);
+    } else {
+      setErrorMessage("Eroare la preluarea cursurilor");
     }
-  };
-
+  } catch (error) {
+    console.error(error);
+    setErrorMessage("Eroare in preluarea cursurilor");
+  }
+};
   useEffect(() => {
     refreshHeader();
     fetchCursuri();
@@ -123,7 +147,10 @@ const Cursuri = ({ user, refreshHeader }) => {
         const newData = { ...user };
         newData.credite = newData.credite - curs.cost;
         localStorage.setItem("userData", JSON.stringify(newData));
+         const updatedUser = { ...user, credite: user.credite - curs.cost };
+        setUser(updatedUser);
         navigate("/cursuri-personale");
+        fetchCursuri();
       } else {
         alert(data || "Eroare in achizitonarea cursului");
       }
@@ -178,45 +205,96 @@ const Cursuri = ({ user, refreshHeader }) => {
               alt={curs.titlu}
               className="course-image"
             />
-            <h3>{curs.titlu}</h3>
-            {user?.elev == true && (
-              <p className="author">Creator: {curs.nume}</p>
-            )}
-        <p className="cost">Cost: {curs.cost} credite</p>
-        {curs.rating && (
-          <div className="course-rating">
-            <img src={filledStar} alt="rating" />
-            <span>{(+curs.rating).toFixed(1)}</span>
-            {!afisare && <button onClick={()=>setAfisare(curs.id)}>Afisare feedback</button>}
-            {afisare == curs.id && <div>
-              <button onClick={()=>setAfisare(false)}>Ascunde feedback</button>
-                 {JSON.parse(curs?.lista_feedback || '[]')?.filter(fb => !!fb)?.map(fb=>{
-                  return (<div>{fb}</div>)
-                })}
-              </div>}
+          <div className="card-info">
+  <h3>{curs.titlu}</h3>
+ <h4>
+  {expandedId === curs.id
+    ? curs.descriere
+    : curs.descriere?.substring(0, 130)}
+</h4>
+
+{curs.descriere?.length > 130 && (
+  <div
+    className="toggle-descriere"
+    onClick={() => toggleDescriere(curs.id)}
+  >
+    {expandedId === curs.id ? "vezi mai puțin" : "..."}
+  </div>
+)}
+  {user?.elev && <p className="author">Creator: {curs.nume}</p>}
+  <p className="cost">Cost: {curs.cost} credite</p>
+
+  <div className="rating-placeholder">
+    {curs.rating ? (
+      <div
+        className="course-rating-wrapper"
+        onMouseEnter={() => setAfisare(curs.id)}
+        onMouseLeave={() => setAfisare(false)}
+      >
+        <div className="course-rating">
+          <img src={filledStar} alt="rating" />
+          <span className="clickable-rating">{(+curs.rating).toFixed(1)}</span>
+        </div>
+        {afisare === curs.id && (
+          <div className="feedback-popup-hover">
+            <h4>Feedback curs:</h4>
+            {(() => {
+  const lista = JSON.parse(curs?.lista_feedback || "[]").filter((fb) => !!fb);
+  const primele5 = lista.slice(0, 5);
+  return (
+    <>
+      {primele5.map((fb, index) => (
+        <p key={index} className="feedback-msg">🗨️ {fb}</p>
+      ))}
+      {lista.length > 4 && (
+        <p
+          className="feedback-msg"
+          style={{ fontWeight: "bold", cursor: "pointer", color: "#1c3b50" }}
+          onClick={() =>
+            navigate(`/feedback/${curs.id}`, {
+              state: { feedback: lista, titlu: curs.titlu },
+            })
+          }
+        >
+          Vezi toate feedback-urile →
+        </p>
+      )}
+    </>
+  );
+})()}
           </div>
         )}
-        
+      </div>
+    ) : null}
+  </div>
 
-            {user?.elev && (
-              <div className="course-actions">
-                <button className="btn-buy" onClick={() => handleBuy(curs)}>
-                  Achiziționează
-                </button>
-                <button
-                  className="btn-favorite"
-                  onClick={() => toggleFavorite(curs.id)}
-                  title="Adaugă la favorite"
-                >
-                  {curs.favorit ? "❤️" : "♡"}
-                </button>
-              </div>
-            )}
-            {user?.elev == false && (
-              <button onClick={() => vizualizareCurs(curs.id, curs.titlu)}>
-                Vizualizeaza
-              </button>
-            )}
+  {user?.elev === true && (
+  <div className="course-actions">
+    {!curs.dejaCumparat ? (
+      <>
+        <button className="btn-buy" onClick={() => handleBuy(curs)}>
+          Achiziționează
+        </button>
+        <button
+          className="btn-favorite"
+          onClick={() => toggleFavorite(curs.id)}
+          title="Adaugă la favorite"
+        >
+          {curs.favorit ? "❤️" : "♡"}
+        </button>
+      </>
+    ) : (
+      <p style={{ color: "lightgreen", fontWeight: "bold" }}>✔ Ai acest curs</p>
+    )}
+  </div>
+)}
+
+  {user?.elev === false && curs.email_profesor === user.email && (
+    <button onClick={() => vizualizareCurs(curs.id, curs.titlu)}>
+      Vizualizează
+    </button>
+  )}
+</div>
           </div>
         ))}
       </div>

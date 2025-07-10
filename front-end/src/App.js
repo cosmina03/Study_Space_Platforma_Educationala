@@ -16,7 +16,7 @@ import ProfilElev from './pages/ProfilElev.jsx'
 import CursuriPersonaleElev from './pages/CursuriPersoanaleElev.jsx';
 import PaginaFinante from './pages/PaginaFinante.jsx';
 import TemeProfesor from './pages/TemeProfesor.jsx';
-import Feedback from './pages/Feedback.jsx';
+import FeedbackCurs from './pages/FeedbackCurs.jsx';
 import PaginaFavorite from './pages/PaginaFavorite.jsx';
 function App() {
   const [user, setUser] = useState({});
@@ -51,7 +51,7 @@ function App() {
           <Route path="/autentificare" element={<LoginSignUp setUser={setUser} refreshHeader={refreshHeader}/>} />
           <Route path="/cursuri" element={<Cursuri user={user} refreshHeader={refreshHeader}/>} />
           <Route path="/creare-curs" element={<CreareCurs user={user}/>} />
-          <Route path="/curs/:id" element={<CursProfesorPagina user={user}/>} />
+          <Route path="/curs/:id" element={<CursProfesorPagina user={user} refreshHeader={refreshHeader}/>} />
           <Route path="curs/:id/creare-material" element={<CreareMaterial user={user}/>}/>
           <Route path="curs/:id/creare-tema" element={<CreareTema user={user}/>}/>
 
@@ -61,7 +61,7 @@ function App() {
           <Route path="/cursuri-personale" element={<CursuriPersonaleElev user={user}/>}/>
           <Route path="/finante" element={<PaginaFinante />} />
           <Route path="/teme" element={<TemeProfesor user={user}/>} />
-          <Route path="/feedback" element={<Feedback user={user}/>} />
+          <Route path="/feedback/:id" element={<FeedbackCurs/>} />
           <Route path="/favorite" element={<PaginaFavorite user={user} refreshHeader={refreshHeader}/>} />
         </Routes>
       </div>

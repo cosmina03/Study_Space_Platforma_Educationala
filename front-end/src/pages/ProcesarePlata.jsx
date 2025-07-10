@@ -2,9 +2,10 @@ import React from "react";
 import "./ProcesarePlata.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_URL } from "../constants.js";
-
-const ProcesarePlata = ({user}) => {
+import { useUser } from "../components/UserContext/UserContext.js";
+const ProcesarePlata = () => {
   const location = useLocation();
+  const { user, setUser } = useUser();
   const { credite, cost } = location.state;
   const navigate = useNavigate();
 
@@ -17,7 +18,8 @@ const ProcesarePlata = ({user}) => {
         },
       });
       alert("Plata procesata cu succes!");
-      navigate("/");
+      setUser({ ...user, credite: user.credite + credite }); 
+      navigate("/cursuri");
     } catch (error) {
       alert("A aparut o eroare la plata.");
     }

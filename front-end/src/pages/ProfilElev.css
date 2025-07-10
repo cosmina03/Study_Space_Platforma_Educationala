@@ -18,18 +18,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-   height: 280px;
+   height: 350px;
 }
-
 .avatar-profil {
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 160px;
   object-fit: cover;
   border-radius: 50%;
   margin-bottom: 20px;
   border: 3px solid #dce7ef;
 }
-
 .left-panel h2 {
   font-size: 20px;
   margin-bottom: 4px;
@@ -96,11 +94,19 @@
   font-weight: 600;
   color: #1d3a4b;
 }
+.cursuri-box div {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.cursuri-box div > div {
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: color 0.2s, text-decoration 0.2s;
+}
 
-.cursuri-box h3 {
-  font-size: 17px;
-  color: #2f5972;
-  margin-bottom: 10px;
+.cursuri-box div > div:hover {
+  text-decoration: underline;
+  color: #1d3a4b;
 }
 
 .fara-cursuri {
