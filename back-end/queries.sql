@@ -216,12 +216,12 @@ SELECT c.*, p.nume, r.rating
 
 SELECT email_elev, total_materiale, total_completate, ((total_completate+0.0)/(total_materiale+0.0))*100 procent FROM (
 (SELECT count(*) total_materiale FROM materiale
-WHERE id_curs = 17),
+WHERE id_curs = 18),
 (SELECT p.email_elev, count(*) total_completate 
 FROM materiale m
-JOIN progres_materiale p ON m.id = p.id_mat
-JOIN elevi e on e.email = p.email_elev
-WHERE id_curs = 17 
+LEFT JOIN progres_materiale p ON m.id = p.id_mat
+LEFT JOIN elevi e on e.email = p.email_elev
+WHERE id_curs = 18 
 GROUP BY email_elev)
 )
 
@@ -288,3 +288,108 @@ SELECT json_group_array(r.feedback_scris) lista_feedback, c.*, p.nume, f.id favo
             ON c.email_profesor = p.email
             LEFT JOIN favorite f ON f.id_curs = c.id
             LEFT JOIN rating r on c.id = r.id_curs
+
+SELECT e.email AS email_elev,
+       e.nume,
+       COUNT(pm.id_mat) AS total_completate,
+       (SELECT COUNT(*) FROM materiale WHERE id_curs = ?) AS total_materiale,
+       (COUNT(pm.id_mat) * 100.0) / 
+       NULLIF((SELECT COUNT(*) FROM materiale WHERE id_curs = ?), 0) AS procent
+FROM elevi e
+LEFT JOIN progres_materiale pm ON e.email = pm.email_elev
+LEFT JOIN materiale m ON pm.id_mat = m.id AND m.id_curs = 13
+WHERE e.email IN (
+    SELECT email_elev FROM participanti WHERE id_curs = 13
+)
+GROUP BY e.email, e.nume
+
+ SELECT * FROM participanti WHERE id_curs = 18
+
+SELECT 
+    e.nume,
+    COALESCE(
+        (COUNT(pm.id_mat) * 100.0) / 
+        NULLIF((SELECT COUNT(*) FROM materiale WHERE id_curs = ?), 0), 
+        0
+    ) AS procent
+FROM elevi e
+LEFT JOIN progres_materiale pm ON e.email = pm.email_elev
+LEFT JOIN materiale m ON pm.id_mat = m.id AND m.id_curs = 18
+WHERE e.email IN (
+    SELECT email_elev FROM participanti WHERE id_curs = 18
+)
+GROUP BY e.nume
+
+WITH total_materiale AS (
+  SELECT COUNT(*) AS total FROM materiale WHERE id_curs = 18
+),
+total_completate AS (
+  SELECT 
+    p.email_elev, 
+    COUNT(*) AS completate
+  FROM materiale m
+  LEFT JOIN progres_materiale p ON m.id = p.id_mat
+  WHERE m.id_curs = 18
+  GROUP BY p.email_elev
+)
+SELECT 
+  tc.email_elev,
+  tm.total AS total_materiale,
+  tc.completate AS total_completate,
+  ROUND((tc.completate * 100.0) / NULLIF(tm.total, 0), 2) AS procent
+FROM total_completate tc
+CROSS JOIN total_materiale tm
+
+
+WITH total_materiale AS (
+  SELECT COUNT(*) AS total FROM materiale WHERE id_curs = 18
+),
+completari AS (
+  SELECT 
+    p.email_elev, 
+    COUNT(*) AS completate
+  FROM progres_materiale p
+  JOIN materiale m ON p.id_mat = m.id
+  WHERE m.id_curs = 18
+  GROUP BY p.email_elev
+)
+SELECT 
+  e.nume,
+  e.email AS email_elev,
+  COALESCE(c.completate, 0) AS total_completate,
+  tm.total AS total_materiale,
+  ROUND((COALESCE(c.completate, 0) * 100.0) / NULLIF(tm.total, 0), 2) AS procent
+FROM participanti p
+JOIN elevi e ON e.email = p.email_elev
+LEFT JOIN completari c ON c.email_elev = e.email
+CROSS JOIN total_materiale tm
+WHERE p.id_curs = 18
+
+
+SELECT 
+  e.nume,
+  e.email AS email_elev,
+  COUNT(CASE WHEN m.id_curs = 13 THEN pm.id_mat END) AS total_completate,
+  (SELECT COUNT(*) FROM materiale WHERE id_curs = 13) AS total_materiale,
+  ROUND(
+    (COUNT(CASE WHEN m.id_curs = 13 THEN pm.id_mat END) * 100.0) / 
+    NULLIF((SELECT COUNT(*) FROM materiale WHERE id_curs = 13), 0), 2
+  ) AS procent
+FROM participanti p
+JOIN elevi e ON p.email_participant = e.email
+LEFT JOIN progres_materiale pm ON pm.email_elev = e.email
+LEFT JOIN materiale m ON pm.id_mat = m.id
+WHERE p.id_curs = 13
+GROUP BY e.email, e.nume;
+
+    SELECT c.titlu, c.id, c.cost* count(p.email_participant) venit, count(p.email_participant) elevi
+      FROM participanti p
+        JOIN cursuri c ON c.id = p.id_curs
+        WHERE c.email_profesor = 'cosmina@gmail.com'
+        group by id, titlu
+        order by venit desc
+        limit 3
+
+SELECT c.id, c.titlu, c.cost, c.cale_poza, p.nume FROM cursuri c JOIN profesori p ON c.email_profesor = p.email
+
+SELECT c.id, c.titlu, c.cost, c.cale_poza, p.nume FROM cursuri c JOIN profesori p ON c.email_profesor = p.email_participant

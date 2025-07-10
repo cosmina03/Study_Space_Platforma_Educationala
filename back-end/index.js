@@ -294,9 +294,10 @@ app.get("/:tipMaterial/:cale/:tip/:download", async (req, res) => {
     if (TIPURI_IMAGINE.includes(tip) && !download) {
       res.setHeader("Content-Type", "image/jpeg");
     } else {
+     const safeTitle = (material?.titlu || "fisier").replace(/[^\w\d-_]/g, "_");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${material?.titlu}.${material?.tip_atasament}"`
+        `attachment; filename="${safeTitle}.${material?.tip_atasament}"`
       );
       res.setHeader("Content-Type", "application/octet-stream");
     }
@@ -322,7 +323,7 @@ app.get("/cursuri/:tip", verifyTokenMiddleware, async (req, res) => {
       if (elev) {
         cursuri = await db.all(`
           SELECT json_group_array(r.feedback_scris  ) lista_feedback
-        , c.titlu, f.id favorit, c.id, p.nume, c.cale_poza, c.cost,
+        , c.titlu, c.descriere, f.id favorit, c.id, p.nume, c.cale_poza, c.cost,
           (SELECT AVG(rating)
           FROM rating r
           WHERE r.id_curs = c.id) rating
@@ -336,12 +337,21 @@ app.get("/cursuri/:tip", verifyTokenMiddleware, async (req, res) => {
             `);
       } else {
         cursuri = await db.all(
-          `
-            SELECT * 
-            FROM cursuri
-            WHERE email_profesor = ?
+          ` SELECT 
+    c.id, 
+    c.titlu, c.descriere,
+    c.cost, 
+    c.cale_poza, 
+    p.nume, 
+    c.email_profesor,
+    (SELECT AVG(rating) FROM rating r WHERE r.id_curs = c.id) AS rating,
+    (SELECT json_group_array(r.feedback_scris) 
+     FROM rating r 
+     WHERE r.id_curs = c.id AND r.feedback_scris IS NOT NULL) AS lista_feedback
+  FROM cursuri c
+  JOIN profesori p ON c.email_profesor = p.email
             `,
-          email
+       
         );
       }
     } else {
@@ -1115,20 +1125,27 @@ app.get("/studenti/:idCurs", verifyTokenMiddleware , async (req, res) => {
     const { sub: email, elev } = req.decoded;
 
     const studenti = await db.all(`
-      SELECT email_elev, nume, total_materiale, total_completate, ((total_completate+0.0)/(total_materiale+0.0))*100 procent FROM (
-      (SELECT count(*) total_materiale FROM materiale
-      WHERE id_curs = ?),
-      (SELECT p.email_elev, e.nume, count(*) total_completate 
-      FROM materiale m
-      JOIN progres_materiale p ON m.id = p.id_mat
-      JOIN elevi e on e.email = p.email_elev
-      WHERE id_curs = ?
-      GROUP BY email_elev)
-      )`,idCurs, idCurs)
+       SELECT 
+        e.nume,
+        e.email AS email_elev,
+        COUNT(CASE WHEN m.id_curs = ? THEN pm.id_mat END) AS total_completate,
+        (SELECT COUNT(*) FROM materiale WHERE id_curs = ?) AS total_materiale,
+        ROUND(
+          (COUNT(CASE WHEN m.id_curs = ? THEN pm.id_mat END) * 100.0) / 
+          NULLIF((SELECT COUNT(*) FROM materiale WHERE id_curs = ?), 0), 2
+        ) AS procent
+      FROM participanti p
+      JOIN elevi e ON p.email_participant = e.email
+      LEFT JOIN progres_materiale pm ON pm.email_elev = e.email
+      LEFT JOIN materiale m ON pm.id_mat = m.id
+      WHERE p.id_curs = ?
+      GROUP BY e.email, e.nume
+      `, idCurs, idCurs, idCurs, idCurs,idCurs)
+      
 
     return res.status(201).json(studenti);
   } catch (error) {
-    console.error(error);
+    console.error("Eroare SQL:", error);
     return res.status(500).json("Eroare de server");
   }
 });
@@ -1161,12 +1178,13 @@ app.put("/schimbare/poza", verifyTokenMiddleware, upload.single("poza_profil"), 
       const fileBuffer = file.buffer;
 
       const resized = await sharp(fileBuffer)
-        .resize({
-          width: 400,
-          height: 160,
-          fit: "cover",
-        })
-        .toBuffer();
+          .resize({
+            width: 400,
+            height: 160,
+            fit: "contain", // NU mai taie nimic, doar adaugă margini
+            background: { r: 255, g: 255, b: 255, alpha: 1 }, // fundal alb
+          })
+          .toBuffer();
 
       const uuid = v4();
       const calePoza = path.join(__dirname, "poze_profil", `${uuid}.jpg`);
