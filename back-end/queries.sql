@@ -393,3 +393,20 @@ GROUP BY e.email, e.nume;
 SELECT c.id, c.titlu, c.cost, c.cale_poza, p.nume FROM cursuri c JOIN profesori p ON c.email_profesor = p.email
 
 SELECT c.id, c.titlu, c.cost, c.cale_poza, p.nume FROM cursuri c JOIN profesori p ON c.email_profesor = p.email_participant
+
+SELECT 
+  json_group_array(r.feedback_scris) AS lista_feedback,
+  c.titlu, 
+  c.descriere, 
+  f.id AS favorit, 
+  c.id, 
+  p.nume, 
+  c.cale_poza, 
+  c.cost,
+  (SELECT AVG(rating) FROM rating r WHERE r.id_curs = c.id) AS rating,
+  (SELECT COUNT(*) FROM materiale m WHERE m.id_curs = c.id) AS nr_materiale
+FROM cursuri c
+JOIN profesori p ON c.email_profesor = p.email
+LEFT JOIN favorite f ON f.id_curs = c.id
+LEFT JOIN rating r ON r.id_curs = c.id
+GROUP BY c.titlu, favorit, c.id, p.nume, c.cale_poza, c.cost

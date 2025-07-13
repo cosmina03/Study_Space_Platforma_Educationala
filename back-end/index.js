@@ -92,7 +92,7 @@ app.post("/creare-cont", async (req, res) => {
     const parolaHash = await bcrypt.hash(parola, salt);
     if (elev) {
       const res = await db.run(
-        "INSERT INTO elevi VALUES (? , ?, ?)",
+       "INSERT INTO elevi (email, parola, nume, cale_poza) VALUES (?, ?, ?, NULL)",
         email,
         parolaHash,
         nume
@@ -102,7 +102,7 @@ app.post("/creare-cont", async (req, res) => {
       }
     } else {
       await db.run(
-        "INSERT INTO profesori VALUES (? , ?, ?)",
+        "INSERT INTO profesori (email, parola, nume, cale_poza) VALUES (?, ?, ?, NULL)",
         email,
         parolaHash,
         nume
@@ -322,19 +322,23 @@ app.get("/cursuri/:tip", verifyTokenMiddleware, async (req, res) => {
     if (tip == "toate") {
       if (elev) {
         cursuri = await db.all(`
-          SELECT json_group_array(r.feedback_scris  ) lista_feedback
-        , c.titlu, c.descriere, f.id favorit, c.id, p.nume, c.cale_poza, c.cost,
-          (SELECT AVG(rating)
-          FROM rating r
-          WHERE r.id_curs = c.id) rating
-            FROM cursuri c
-            JOIN profesori p
-            ON c.email_profesor = p.email
-            LEFT JOIN favorite f ON f.id_curs = c.id
-            LEFT JOIN rating r on r.id_curs = c.id
-            group by titlu, favorit, c.id, nume, c.cale_poza,c.cost
-
-            `);
+          SELECT 
+  json_group_array(r.feedback_scris) AS lista_feedback,
+  c.titlu, 
+  c.descriere, 
+  f.id AS favorit, 
+  c.id, 
+  p.nume, 
+  c.cale_poza, 
+  c.cost,
+  (SELECT AVG(rating) FROM rating r WHERE r.id_curs = c.id) AS rating,
+  (SELECT COUNT(*) FROM materiale m WHERE m.id_curs = c.id) AS nr_materiale
+FROM cursuri c
+JOIN profesori p ON c.email_profesor = p.email
+LEFT JOIN favorite f ON f.id_curs = c.id AND f.email_elev = ?
+LEFT JOIN rating r ON r.id_curs = c.id
+GROUP BY c.titlu, favorit, c.id, p.nume, c.cale_poza, c.cost
+            `,[email]);
       } else {
         cursuri = await db.all(
           ` SELECT 
