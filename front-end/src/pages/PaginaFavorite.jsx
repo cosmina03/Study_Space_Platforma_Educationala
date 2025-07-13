@@ -7,6 +7,27 @@ const PaginaFavorite = ({user, refreshHeader}) => {
     
     const navigate = useNavigate()
     const [favorite, setFavorite] = useState([])
+const [achizitionate, setAchizitionate] = useState([]);
+
+const fetchAchizitionate = async () => {
+  try {
+    const response = await fetch(API_URL + "/cursuri/proprii", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authentication: localStorage.getItem("jwt") || "",
+      },
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      const ids = data.cursuri.map((c) => c.id);
+      setAchizitionate(ids); 
+    }
+  } catch (error) {
+    console.error("Eroare la fetchAchizitionate", error);
+  }
+};
 
     const fetchFavorite = async () => {
         try {
@@ -27,7 +48,8 @@ const PaginaFavorite = ({user, refreshHeader}) => {
     }
 
     useEffect(()=>{
-        fetchFavorite()
+        fetchFavorite();
+        fetchAchizitionate();
     }, [])
 
       const handleBuy = async (curs) => {
@@ -81,6 +103,17 @@ const PaginaFavorite = ({user, refreshHeader}) => {
 
     return (
         <div className="courses-grid">
+                          {(!favorite || favorite.length === 0) && (
+                  <div className="fallback-card-wrapper">
+                    <div className="fallback-card">
+                      <h2>Nu aveți cursuri favorite</h2>
+                      <p>Descoperiți cursurile noastre și adăugați-le la favorite!</p>
+                      <button onClick={() => navigate("/cursuri")} className="btn-fallback">
+                        Vezi cursurile disponibile
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {favorite?.map((curs) => (
                   <div className="course-card" key={curs.id}>
                     <img
@@ -99,7 +132,18 @@ const PaginaFavorite = ({user, refreshHeader}) => {
                     </div>
                    
                       <div className="course-actions">
-                        <button className="btn-buy" onClick={()=>handleBuy(curs)}>Achiziționează</button>
+                       {achizitionate.includes(curs.id) ? (
+                        <button
+                          className="btn-view"
+                          onClick={() => navigate(`/curs/${curs.id}`, { state: { nume: curs.titlu } })}
+                        >
+                          Vizualizează
+                        </button>
+                      ) : (
+                        <button className="btn-buy" onClick={() => handleBuy(curs)}>
+                          Achiziționează
+                        </button>
+                      )}
                         <button
                           className="btn-favorite"
                           onClick={() => removeToFavorites(curs.id)}

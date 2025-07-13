@@ -24,10 +24,11 @@ import {
 
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from "../../constants.js";
+import { useUser } from "../../components/UserContext/UserContext.js";
 
 export default function StudySpaceDrawer({user, refreshHeader}) {
   const [state, setState] = useState({ left: false });
-
+  const { logout } = useUser();
   const navigate = useNavigate();
 
   const isLoggedIn = !!user;
@@ -38,11 +39,11 @@ export default function StudySpaceDrawer({user, refreshHeader}) {
     setState({ ...state, [anchor]: open });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('userData');
-    navigate('/autentificare');
-    refreshHeader()
-  };
+const handleLogout = () => {
+  logout();               // șterge userul și JWT-ul
+  refreshHeader();        // forțează re-randarea
+  navigate("/autentificare"); // duce la pagina de login
+};
 
   const list = (anchor) => (
     <List className="drawer-list">

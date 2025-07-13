@@ -12,6 +12,8 @@ const CursuriPersonaleElev = ({user}) => {
   const [cursuri, setCursuri] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
 
+  
+
   const fetchCursuri = async () => {
     try {
       const response = await fetch(API_URL + "/cursuri/proprii", {
@@ -25,7 +27,25 @@ const CursuriPersonaleElev = ({user}) => {
       const data = await response.json();
 
       if (response.ok) {
-        setCursuri(data.cursuri);
+      
+          const cursuriCuProgres = await Promise.all(
+    data.cursuri.map(async (c) => {
+      try {
+        const progresRes = await fetch(`${API_URL}/progres/${c.id}`, {
+          headers: {
+            Authentication: localStorage.getItem("jwt") || "",
+          },
+        });
+        const progresData = await progresRes.json();
+        return { ...c, progres: progresData?.procent || 0 };
+      } catch (e) {
+        console.error("Eroare progres", e);
+        return { ...c, progres: 0 };
+      }
+    })
+  );
+
+  setCursuri(cursuriCuProgres);
       } else {
         setErrorMessage(data.message || "Eroare in preluarea cursurilor");
       }
@@ -115,7 +135,16 @@ const CursuriPersonaleElev = ({user}) => {
           <div className="courses-grid">
             {!!errorMessage && <div>{errorMessage}</div>}
 
-            {(!cursuri || !Array.isArray(cursuri) || !cursuri?.length) && <div>Nu ati achizitionat niciun curs inca.</div>}
+          {(!cursuri || !Array.isArray(cursuri) || !cursuri.length) && (
+  <div className="empty-card">
+    <h2>Nu ați achiziționat niciun curs încă</h2>
+    <p>Explorați catalogul nostru de cursuri și începeți să învățați!</p>
+    <button className="btn-explore" onClick={() => navigate("/cursuri")}>
+      Vezi cursurile disponibile
+    </button>
+  </div>
+)}
+
             {cursuri?.map((curs) => (
               <div className="course-card" key={curs.id}>
                 <img
@@ -128,7 +157,7 @@ const CursuriPersonaleElev = ({user}) => {
                   <p className="author">Creator: {curs.nume}</p>
                 )}
                 <p className="cost">Cost: {curs.cost} credite</p>
-               {user.elev && curs.rating !== null && <div className="rating">
+               {user.elev &&  curs.progres >= 50 && curs.rating !== null && <div className="rating">
                   {[...Array(curs.rating).keys()].map(item => 
                       <img src={filledStar} onClick={()=>handleStarClick(item+1, curs.id)}/>
                   )}
@@ -136,7 +165,7 @@ const CursuriPersonaleElev = ({user}) => {
                       <img src={emptyStar} onClick={()=>handleStarClick(curs.rating+item+1, curs.id)}/>
                   )}
                 </div>}
-                {user.elev && curs.rating === null && <div className="rating">
+                {user.elev && curs.progres >= 50 && curs.rating === null && <div className="rating">
                   {[...Array(MAX_STARS).keys()].map(item => 
                       <img src={emptyStar} onClick={()=>handleStarClick(curs.rating+item+1, curs.id)}/>
                   )}

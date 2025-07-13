@@ -1,91 +1,3 @@
-// import { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { API_URL } from "../constants.js";
-// import "./TemeProfesor.css"
-//const SURSA_POZA = "http://localhost:8080/poza";
-
-// const TemeProfesor = ({ user }) => {
-//   const navigate = useNavigate();
-//   const [teme, setTeme] = useState([])
-//   const [cursuri, setCursuri] = useState([])
-//   const [errorMessage, setErrorMessage] = useState("");
-
-//   const fetchTeme = async () => {
-//     try {
-//       const response = await fetch(API_URL + "/teme", {
-//         method: "GET",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authentication: localStorage.getItem("jwt") || "",
-//         },
-//       });
-
-//       const data = await response.json();
-
-//       if (response.ok) {
-//         setTeme(data.teme);
-//         setCursuri(prev=>{
-//             const cursuriSet = {}
-//             data.teme.forEach(tema => {
-//                 if(!cursuriSet[tema.id_curs]){
-//                     cursuriSet[tema.id_curs] = tema.titlu
-//                 }
-//             })
-//             // console.log(cursuriSet)
-//             return cursuriSet
-//         })
-
-//       } else {
-//         setErrorMessage(data.message || "Eroare in preluarea temelor");
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       setErrorMessage("Eroare in preluarea temelor");
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchTeme();
-//   }, []);
-
-//   const descarcaRaspuns = async (idRaspuns) => {
-//         const link = document.createElement("a");
-//         link.href = `${API_URL}/raspuns/${idRaspuns}`;
-//         link.download = `Raspuns tema`;
-//         document.body.appendChild(link);
-//         link.click();
-//         document.body.removeChild(link);
-//   };
-
-//   return (
-//     <div className="courses-page">
-
-//       <div className="courses-grid">
-//         {!!errorMessage && <div>{errorMessage}</div>}
-//          {!Object.keys(cursuri)?.length && <div> Momentan nu exista teme neevaluate</div> }
-//         {Object.entries(cursuri)?.map(([id, curs]) => {
-            
-            
-//             return(
-//             <div key={id}>
-//                 <div>{curs}</div>    
-//                 {teme?.filter(tema => tema.id_curs == id)?.map( (tema, idxTema) => {
-
-//                     return (
-//                     <div style={{display: 'flex', gap: '0.5rem'}}>
-//                         <div>Elev : {tema?.nume}</div>
-//                         <button onClick={()=>{descarcaRaspuns(tema.id_rasp)}}>Descarca raspuns</button>
-//                         <button onClick={()=>{
-//                           navigate('/feedback', {state: {tema}})
-//                         }}>Adauga feedback</button>
-//                     </div>)
-//                 } )}
-//             </div>)
-//         })}
-//       </div>
-//     </div>
-//   );
-// };
 
 import { useEffect, useState } from "react";
 import "./TemeProfesor.css";
@@ -181,7 +93,7 @@ const TemeProfesor = ({ user }) => {
                     </button>
                     <button
                       className="btn-feedback"
-                      onClick={() => navigate("/feedback", { state: { tema } })}
+                      onClick={() => navigate("/feedback-tema", { state: { tema } })}
                     >
                       Adaugă feedback
                     </button>

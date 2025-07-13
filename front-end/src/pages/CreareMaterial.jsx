@@ -4,6 +4,7 @@ import { TextField, Button, IconButton, Box } from "@mui/material";
 import { AttachFile, DriveFolderUpload, YouTube, Link, AddCircle } from "@mui/icons-material";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { API_URL } from "../constants.js";
+import Alert from "../components/Alerta/Alerta.jsx";
 
 export default function CreareMaterial() {
 
@@ -16,7 +17,7 @@ export default function CreareMaterial() {
   const [descriere, setDescriere] = useState(material?.descriere|| "");
   const fileInputRef = useRef(null)
   const [file, setFile] = useState(null)
-
+const [mesajSucces, setMesajSucces] = useState("");
   const handleSubmit = async () => {
             try {
                 if(!file && !material ){
@@ -42,8 +43,11 @@ export default function CreareMaterial() {
                 })
                 const date = await response.json()
                 if(response.ok){
-                    alert(`Material ${material ? "modificat" : "adaugat"} cu succes!`)
+                 setMesajSucces(`Material ${material ? "modificat" : "adăugat"} cu succes!`);
+                  setTimeout(() => {
                     navigate(`/curs/${id}`);
+                  }, 2500);
+            
                 }
             } catch (error) {
                 console.error(error)
@@ -64,6 +68,13 @@ export default function CreareMaterial() {
 
   return (
     <div className="creare-material-container">
+      {mesajSucces && (
+  <Alert
+    mesaj={mesajSucces}
+    tip="success"
+    onClose={() => setMesajSucces("")}
+  />
+)}
       <Button
         variant="text"
         onClick={handleBack}

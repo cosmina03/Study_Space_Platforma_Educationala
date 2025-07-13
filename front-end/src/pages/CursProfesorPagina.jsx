@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "./CursProfesorPagina.css";
-import { API_URL, TIPURI_IMAGINE } from "../constants.js";
+import { API_URL, TIPURI_IMAGINE, TIPURI_VIDEO } from "../constants.js";
 import { FaCheck, FaFolder, FaTablet } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
+import Alerta from "../components/Alerta/Alerta.jsx"
 import { useRef } from "react";
-
-
 
 import {
   BarChart,
@@ -42,6 +41,9 @@ export default function CursProfesorPagina({ user, refreshHeader  }) {
   const navigate = useNavigate();
   const [progres, setProgres] = useState({});
   const [studenti, setStudenti] = useState([])
+  const [mesajSucces, setMesajSucces] = useState("");
+const [mesajEroare, setMesajEroare] = useState("");
+
 
   const fetchMateriale = async () => {
     try {
@@ -174,6 +176,9 @@ export default function CursProfesorPagina({ user, refreshHeader  }) {
       if (response.ok) {
         setSubmittedTemaIds((ids) => [...ids, idTema]);
         setTema(null);
+        setMesajSucces("Tema a fost trimisă cu succes!");
+  setMesajEroare("");
+  setTimeout(() => setMesajSucces(""), 3000);
         setErrorMessage("");
       } else {
         setErrorMessage(data || "Eroare trimitere temă");
@@ -233,10 +238,14 @@ export default function CursProfesorPagina({ user, refreshHeader  }) {
         ref={fileInputRef}
         onChange={handleChange}
       />
-      <div className="top-bar-prof">
-        <h2 className="titlu-curs">
-          <em>{nume}</em>
-        </h2>
+                <div className="top-bar-prof">
+
+                 <div className="titlu-curs">
+  {nume.replaceAll("_", " ").split(" - ").map((linie, idx) => (
+    <div key={idx}>{linie}</div>
+  ))}
+</div>
+
         <div className="tab-uri">
           <span
             className={tab === "materiale" ? "activ" : ""}
@@ -266,14 +275,23 @@ export default function CursProfesorPagina({ user, refreshHeader  }) {
               Parcursul-Meu
             </span>
           )}
-          {user?.elev && progres?.procent >= 50 && (
-          <Button
-            className="btn-feedback-inline"
-            onClick={() => navigate(`/feedback/${id}`)}
-          >
-            Lasă un feedback cursului
-          </Button>
-        )}
+          {user?.elev === true && (<div className="feedback-button-wrapper">
+          <div className="tooltip-wrapper">
+            <button
+              className={`feedback-button ${progres?.procent < 50 ? "disabled" : ""}`}
+              onClick={() => {
+                if (progres?.procent >= 50) navigate(`/cursuri-personale`);
+              }}
+            >
+              Lasă un feedback cursului
+            </button>
+            {progres?.procent < 50 && (
+              <span className="tooltip-msg">
+                Poți lăsa feedback după ce parcurgi 50% din curs.
+              </span>
+            )}
+          </div>
+        </div>)}
         </div>
         {!user.elev && (
           <div className="buton-plus-wrapper">
@@ -301,7 +319,7 @@ export default function CursProfesorPagina({ user, refreshHeader  }) {
         {tab === "materiale" && (
           <div className="lista-materiale">
             {materiale.map((m, idx) => {
-              const isImage = TIPURI_IMAGINE.includes(m.tip_atasament);
+              
               const isExpanded = expandedIndex === `mat-${idx}`;
               return (
                 <div className="card-collapsible" key={idx}>
@@ -316,19 +334,33 @@ export default function CursProfesorPagina({ user, refreshHeader  }) {
                   </div>
                   {isExpanded && (
                     <div className="card-body">
-                      {isImage && (
-                        <img
-                          src={`${API_URL}/atasament/${m.cale_atasament}/${m.tip_atasament}/false`}
-                          className="material-img"
-                          onClick={() =>
-                            setSelectedImage(
-                              `${API_URL}/atasament/${m.cale_atasament}/${m.tip_atasament}/false`
-                            )
-                          }
-                          style={{ cursor: "zoom-in" }}
-                        />
-                      )}
-                      {m.descriere && <p>{m.descriere}</p>}
+                     {TIPURI_IMAGINE.includes(m.tip_atasament) && (
+                  <img
+                    src={`${API_URL}/atasament/${m.cale_atasament}/${m.tip_atasament}/false`}
+                    className="material-img"
+                    onClick={() =>
+                      setSelectedImage(
+                        `${API_URL}/atasament/${m.cale_atasament}/${m.tip_atasament}/false`
+                      )
+                    }
+                    style={{ cursor: "zoom-in" }}
+                  />
+                )}
+
+                {TIPURI_VIDEO.includes(m.tip_atasament) && (
+                  <video
+                    controls
+                    className="material-img"
+                    style={{ maxHeight: "300px", borderRadius: "8px" }}
+                  >
+                    <source
+                      src={`${API_URL}/atasament/${m.cale_atasament}/${m.tip_atasament}/false`}
+                      type={`video/${m.tip_atasament}`}
+                    />
+                    Browserul tău nu suportă redarea video.
+                  </video>
+                )}
+                      {m.descriere?.trim() && <p>{m.descriere}</p>}
                       <div className="card-actions">
                         <button
                           className="btn"
@@ -374,7 +406,7 @@ export default function CursProfesorPagina({ user, refreshHeader  }) {
             {teme.map((m, idx) => {
               const isImage = TIPURI_IMAGINE.includes(m.tip_atasament);
               const isExpanded = expandedIndex === `tema-${idx}`;
-              const hasFeedback = Boolean(m.text);
+              const hasFeedback = Boolean(m.nota);
               const hasSubmitted = submittedTemaIds.includes(m.id);
 
               return (
@@ -417,7 +449,7 @@ export default function CursProfesorPagina({ user, refreshHeader  }) {
                         </div>
                       )}
 
-                      {user.elev && m.cale_atasament && m.id_feedback && (
+                      {user.elev && m.cale_atasament&& (
                         <button
                           className="btn"
                           onClick={() => handleDownloadFeedback(m.id_feedback)}

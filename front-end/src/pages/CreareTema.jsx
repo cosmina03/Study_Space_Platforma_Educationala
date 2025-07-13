@@ -4,7 +4,7 @@ import { TextField, Button, IconButton, Box } from "@mui/material";
 import { AttachFile, DriveFolderUpload, YouTube, Link, AddCircle } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { API_URL } from "../constants.js";
-
+import Alert from "../components/Alerta/Alerta.jsx";
 export default function CreareTema() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ export default function CreareTema() {
   const [deadline, setDeadline] = useState("");
   const [file, setFile] = useState(null)
   const fileInputRef = useRef(null)
-
+const [mesajSucces, setMesajSucces] = useState("");
   const handleSubmit = async () => {
             try {
                 if(!file){
@@ -43,8 +43,11 @@ export default function CreareTema() {
                 })
                 const date = await response.json()
                 if(response.ok){
-                    alert(`Tema adaugata cu succes!`)
-                    navigate(`/curs/${id}`);
+                   setMesajSucces("Tema a fost adăugată cu succes!");
+                    setTimeout(() => {
+                      navigate(`/curs/${id}`);
+                    }, 2500);
+                   
                 }
             } catch (error) {
                 console.error(error)
@@ -60,7 +63,15 @@ export default function CreareTema() {
   }
 
   return (
+    
     <div className="creare-tema-container">
+    {mesajSucces && (
+     <Alert
+       mesaj={mesajSucces}
+       tip="success"
+       onClose={() => setMesajSucces("")}
+     />
+   )}
       <Button
         variant="text"
         onClick={() => navigate(`/curs/${id}`)}

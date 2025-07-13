@@ -18,6 +18,8 @@ import PaginaFinante from './pages/PaginaFinante.jsx';
 import TemeProfesor from './pages/TemeProfesor.jsx';
 import FeedbackCurs from './pages/FeedbackCurs.jsx';
 import PaginaFavorite from './pages/PaginaFavorite.jsx';
+import Feedback from './pages/Feedback.jsx';
+
 function App() {
   const [user, setUser] = useState({});
 
@@ -54,7 +56,7 @@ function App() {
           <Route path="/curs/:id" element={<CursProfesorPagina user={user} refreshHeader={refreshHeader}/>} />
           <Route path="curs/:id/creare-material" element={<CreareMaterial user={user}/>}/>
           <Route path="curs/:id/creare-tema" element={<CreareTema user={user}/>}/>
-
+          <Route path="/feedback-tema" element={<Feedback user={user}/>} />
           <Route path="/abonamente" element={<Abonamente user={user}/>} />
           <Route path="/plata" element={<ProcesarePlata user={user}/>} />
           <Route path="/profil" element={<ProfilElev user={user} refreshHeader={refreshHeader}/>}/>

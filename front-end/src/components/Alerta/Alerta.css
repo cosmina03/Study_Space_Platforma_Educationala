@@ -1,0 +1,46 @@
+.alerta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  margin: 20px auto;
+  width: fit-content;
+  max-width: 90%;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.3s ease-in-out;
+  position: relative;
+}
+
+.alerta-success {
+  background-color: #d4edda;
+  color: #256029;
+  border-left: 6px solid #28a745;
+}
+
+.alerta-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 6px solid #dc3545;
+}
+
+.inchide {
+  background: none;
+  border: none;
+  font-size: 16px;
+  margin-left: 16px;
+  color: inherit;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

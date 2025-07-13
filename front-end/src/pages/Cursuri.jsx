@@ -5,6 +5,8 @@ import { API_URL } from "../constants.js";
 import filledStar from "../assets/filled-star.svg";
 import coin from "../assets/coin.svg";
 import { useUser } from "../components/UserContext/UserContext.js"; 
+import PopupAlert from "../components/Alerta/PopupAlert.jsx";
+import Alert from "../components/Alerta/Alerta.jsx";
 const SURSA_POZA = "http://localhost:8080/poza";
 
 
@@ -17,6 +19,7 @@ const Cursuri = ({ refreshHeader }) => {
   const [favorited, setFavorited] = useState([]);
   const { user, setUser } = useUser();
 const [expandedId, setExpandedId] = useState(null);
+const [mesajEroare, setMesajEroare] = useState("");
 
 const toggleDescriere = (id) => {
   setExpandedId((prev) => (prev === id ? null : id));
@@ -24,6 +27,31 @@ const toggleDescriere = (id) => {
 
 const fetchCursuri = async () => {
   try {
+    if (user?.elev === false) {
+  try {
+    const response = await fetch(API_URL + "/cursuri/toate", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authentication: localStorage.getItem("jwt") || "",
+      },
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setCursuri(data.cursuri);
+      setCursuriFiltrate(data.cursuri);
+    } else {
+      setErrorMessage("Eroare la preluarea cursurilor");
+    }
+  } catch (error) {
+    console.error(error);
+    setErrorMessage("Eroare în preluarea cursurilor");
+  }
+
+  return; 
+}
     const [toateRes, propriiRes] = await Promise.all([
       fetch(API_URL + "/cursuri/toate", {
         method: "GET",
@@ -45,15 +73,18 @@ const fetchCursuri = async () => {
     const propriiData = await propriiRes.json();
 
     if (toateRes.ok && propriiRes.ok) {
-      const cumparate = propriiData.cursuri.map((c) => c.id);
+       const cumparate = propriiData.cursuri.map((c) => c.id);
 
-      const marcate = toateData.cursuri.map((c) => ({
-        ...c,
-        dejaCumparat: cumparate.includes(c.id),
-      }));
+  
+  const marcate = toateData.cursuri
+    .filter((c) => c.nr_materiale >= 3)
+    .map((c) => ({
+      ...c,
+      dejaCumparat: cumparate.includes(c.id),
+    }));
 
-      setCursuri(marcate);
-      setCursuriFiltrate(marcate);
+  setCursuri(marcate);
+  setCursuriFiltrate(marcate);
     } else {
       setErrorMessage("Eroare la preluarea cursurilor");
     }
@@ -130,35 +161,45 @@ const fetchCursuri = async () => {
     }
   };
 
-  const handleBuy = async (curs) => {
-    try {
-      const response = await fetch(API_URL + `/achizitionare/${curs.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authentication: localStorage.getItem("jwt") || "",
-        },
-      });
+ const handleBuy = async (curs) => {
+  try {
+    const response = await fetch(API_URL + `/achizitionare/${curs.id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authentication: localStorage.getItem("jwt") || "",
+      },
+    });
 
-      const data = await response.json();
-      if (response.ok) {
-        refreshHeader();
-        alert(data);
-        const newData = { ...user };
-        newData.credite = newData.credite - curs.cost;
-        localStorage.setItem("userData", JSON.stringify(newData));
-         const updatedUser = { ...user, credite: user.credite - curs.cost };
-        setUser(updatedUser);
-        navigate("/cursuri-personale");
-        fetchCursuri();
+    const data = await response.json();
+
+    if (response.ok) {
+      refreshHeader();
+
+      // Actualizare localStorage și context
+      const newData = { ...user, credite: user.credite - curs.cost };
+      localStorage.setItem("userData", JSON.stringify(newData));
+      setUser(newData);
+
+      navigate("/cursuri-personale");
+      fetchCursuri();
+    } else {
+      if (data === "Nu aveti suficiente credite") {
+        setMesajEroare("Nu aveți suficiente credite. Vă rugăm să achiziționați un abonament.");
+        setTimeout(() => {
+          setMesajEroare("");
+          navigate("/abonamente");
+        }, 2000);
       } else {
-        alert(data || "Eroare in achizitonarea cursului");
+        setMesajEroare(data || "Eroare în achiziționarea cursului.");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Eroare in achizitonarea cursului");
     }
-  };
+  } catch (error) {
+    console.error("Eroare în comunicarea cu serverul:", error);
+    setMesajEroare("A apărut o eroare neașteptată. Încercați din nou.");
+  }
+};
+
 
   useEffect(() => {
     setCursuriFiltrate(() => {
@@ -181,7 +222,18 @@ const fetchCursuri = async () => {
   const [afisare, setAfisare] = useState(false)
 
   return (
+    
     <div className="courses-page">
+   {mesajEroare &&  (
+  <PopupAlert
+    mesaj={mesajEroare}
+    onClose={() => setMesajEroare("")}
+    actiune={() => {
+      setMesajEroare("");
+      navigate("/abonamente");
+    }}
+  />
+) }
       {user?.elev == true && (
         <>
           <h1 className="courses-title">Explorează cursurile</h1>

@@ -139,3 +139,43 @@
 .course-card {
   animation: fadeInUp 0.4s ease-in-out;
 }
+
+.fallback-card-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin-top: 80px !important; /* distanță față de bara de sus */
+}
+
+.fallback-card {
+  text-align: center !important;
+  padding: 30px !important;
+  border: 2px dashed #a0b4c7 !important;
+  border-radius: 12px !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+  max-width: 400px !important;
+  width: 100% !important;
+}
+
+.fallback-card p {
+  font-size: 16px;
+  color: #546e7a;
+  margin-bottom: 24px;
+}
+
+.btn-fallback {
+  padding: 10px 22px;
+  background-color: #2c6079;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-fallback:hover {
+  background-color: #234d61;
+}

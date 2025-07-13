@@ -1,32 +1,50 @@
-import React from "react";
+import React, { useState } from "react";
 import "./ProcesarePlata.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_URL } from "../constants.js";
 import { useUser } from "../components/UserContext/UserContext.js";
+import PopupAlert from "../components/Alerta/PopupAlert.jsx";
+
 const ProcesarePlata = () => {
   const location = useLocation();
   const { user, setUser } = useUser();
   const { credite, cost } = location.state;
   const navigate = useNavigate();
-
+const [mesajSucces, setMesajSucces] = useState("");
   const handlePayment = async () => {
     try {
-      await fetch(`${API_URL}/plata/${credite}`, {
+      const response = await fetch(`${API_URL}/plata/${credite}`, {
         method: "POST",
         headers: {
           Authentication: localStorage.getItem("jwt") || "",
         },
       });
-      alert("Plata procesata cu succes!");
-      setUser({ ...user, credite: user.credite + credite }); 
-      navigate("/cursuri");
+
+      if (response.ok) {
+        setUser({ ...user, credite: user.credite + credite });
+        setMesajSucces("Plata procesată cu succes!");
+
+        setTimeout(() => {
+          setMesajSucces("");
+          navigate("/cursuri");
+        }, 2000);
+      } else {
+        alert("Eroare în procesarea plății.");
+      }
     } catch (error) {
-      alert("A aparut o eroare la plata.");
+      alert("A apărut o eroare la plata.");
     }
   };
 
   return (
+    
     <div className="payment-container">
+      {mesajSucces && (
+        <PopupAlert
+          mesaj={mesajSucces}
+          onClose={() => setMesajSucces("")}
+        />
+      )}
       <div className="payment-box">
         <h2 className="payment-title">
           <span role="img" aria-label="lock"> 🔒</span> Payment

@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import "./LoginSignUp.css";
 import { API_URL } from "../../constants.js";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../UserContext/UserContext.js";
 
-const LoginSignUp = ({ setUser, refreshHeader }) => {
-  const [isLogin, setIsLogin] = useState(true);
+const LoginSignUp = ({ refreshHeader }) => {
+  const { setUser } = useUser();
+  const [isLogin, setIsLogin] = useState();
   const [role, setRole] = useState("elev");
   const [nume, setNume] = useState("");
   const [email, setEmail] = useState("");

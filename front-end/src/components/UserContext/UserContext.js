@@ -6,7 +6,7 @@ const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
 
   useEffect(() => {
     const storedUser = localStorage.getItem("userData");
@@ -22,8 +22,15 @@ export const UserProvider = ({ children }) => {
     }
   }, [user]);
 
+  const logout = () => {
+    localStorage.removeItem("jwt");
+    localStorage.removeItem("userData");
+    setUser({});
+  };
+
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, logout }}>
       {children}
     </UserContext.Provider>
   );
